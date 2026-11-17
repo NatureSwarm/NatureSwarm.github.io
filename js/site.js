@@ -100,7 +100,7 @@
       out.n.textContent = S.n;
       if (S.mode === 'hub') { out.reads.textContent = `${S.n} reports`; out.writes.textContent = `${S.n} orders`; out.fate.textContent = 'no drone gets orders'; }
       else { out.reads.textContent = 'the records of drones in radio range'; out.writes.textContent = 'one choice of its own'; out.fate.textContent = 'the team keeps working'; }
-      out.fail.textContent = S.failed ? 'Restore the hub' : 'Silence the hub'; out.fail.classList.toggle('on', S.failed);
+      out.fail.textContent = S.failed ? 'Restore the coordinator' : 'Silence the coordinator'; out.fail.classList.toggle('on', S.failed);
     };
     const draw = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1), cw = cv.clientWidth || W, ch = cv.clientHeight || H;

@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
 <link rel="stylesheet" href="css/site.css">
 <link rel="stylesheet" href="css/charts.css">
+<link rel="stylesheet" href="css/evolution.css">
 </head>
 <body>
 
@@ -22,6 +23,7 @@
     <a href="#overview">Overview</a>
     <a href="#demos">Demos</a>
     <a href="#findings">Findings</a>
+    <a href="#evolution">Evolution</a>
     <a href="#method">Method</a>
     <a href="#video">Video</a>
     <a href="#code">Code</a>
@@ -105,25 +107,25 @@
       <article class="card lift">
         <div class="glyph" data-glyph="robust"></div>
         <h3>Robustness</h3>
-        <p>Every report and every order passes through the hub. In a collective no single member can stall the group.</p>
+        <p>Every report and every order passes through the coordinator. In a collective no single member can stall the group.</p>
       </article>
     </div>
 
     <div class="lab reveal" id="lab">
       <div class="lab-text">
         <p class="label">Try it</p>
-        <h3>One hub, or many neighbours</h3>
-        <p>Switch the organization, change the team size and silence the hub. The picture is a schematic of the two organizations, not a recorded episode.</p>
+        <h3>One coordinator, or many neighbours</h3>
+        <p>Switch the organization, change the team size and silence the coordinator. The picture is a schematic of the two organizations, not a recorded episode.</p>
         <div class="seg" role="tablist" aria-label="Organization">
           <button type="button" class="on" data-mode="hub" role="tab" aria-selected="true">Coordinator</button>
           <button type="button" data-mode="swarm" role="tab" aria-selected="false">NatureSwarm</button>
         </div>
         <label class="range"><span>Team size <b id="lab-n">32</b></span><input id="lab-size" type="range" min="0" max="4" step="1" value="2" aria-label="Team size"></label>
-        <button type="button" class="btn outline" id="lab-fail">Silence the hub</button>
+        <button type="button" class="btn outline" id="lab-fail">Silence the coordinator</button>
         <dl class="readout">
           <div><dt>What the deciding agent reads</dt><dd id="lab-reads">32 reports</dd></div>
           <div><dt>What it writes in one reply</dt><dd id="lab-writes">32 orders</dd></div>
-          <div><dt>If the hub falls silent</dt><dd id="lab-fate">no drone gets orders</dd></div>
+          <div><dt>If the coordinator falls silent</dt><dd id="lab-fate">no drone gets orders</dd></div>
         </dl>
       </div>
       <div class="lab-stage"><canvas id="lab-canvas" width="720" height="520" aria-label="Schematic of a coordinator and of a neighbour network"></canvas></div>
@@ -196,10 +198,42 @@
       </div>
     </article>
     <article class="finding flip reveal">
-      <div class="f-text"><span class="f-num">05</span><h3>When model calls took time or the hub failed, NatureSwarm led</h3><p>Once model calls took time, NatureSwarm outperformed even the frontier model's coordinator, and it kept teams working when radio links or the base failed.</p><p class="f-hint">Switch between slow calls and a silent base; the replay button runs the episode again.</p></div>
+      <div class="f-text"><span class="f-num">05</span><h3>When calls took time or the base fell silent, NatureSwarm led</h3><p>Once the simulated world kept moving during model calls, NatureSwarm outperformed even the frontier model's coordinator, and it kept teams working when radio range was cut or the base fell silent.</p><p class="f-hint">Switch between calls that take time and a silent base; the replay button runs the episode again.</p></div>
       <div class="chart-card" id="chart-robust"></div>
     </article>
     <p class="chart-source reveal">Every chart draws the values plotted in the manuscript's figures. <button type="button" class="link zoom" data-full="media/fig2.png">Fig. 2</button> <button type="button" class="link zoom" data-full="media/fig3.png">Fig. 3</button> <button type="button" class="link zoom" data-full="media/fig4.png">Fig. 4</button></p>
+  </div>
+</section>
+
+<section id="evolution" class="band">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="label">Evolution</p>
+      <h2>Evolution searched whole team designs, and dropped the smaller models' coordinators</h2>
+      <p class="sub">A team's organization is treated as a genome: who decides, what drones share and which of NatureSwarm's mechanisms they use. Both demos replay stored runs, generation by generation.</p>
+    </div>
+    <div class="evo-card reveal" id="evo-population">
+      <div class="evo-top">
+        <div class="evo-title"><b>Ten team designs, five generations</b><span>Every generation each design runs the mission. The best half is kept unchanged, and the other half is replaced by mutants of the kept designs. Half of the starting population has a coordinator.</span></div>
+        <div class="seg evo-settings"></div>
+      </div>
+      <div class="evo-row"><div class="evo-lines" aria-label="Population"></div><button type="button" class="evo-play" id="evo-play">Replay from generation 0</button></div>
+      <div class="evo-scroll" tabindex="0" aria-label="The population by generation"><div class="evo-stage"></div></div>
+      <div class="evo-keyhost"></div>
+      <div class="evo-detail" aria-live="polite"></div>
+      <div class="evo-summary"></div>
+    </div>
+    <div class="evo-card reveal" id="evo-selection">
+      <div class="evo-top">
+        <div class="evo-title"><b>Does cooperation need selection on whole teams?</b><span>Each NatureSwarm drone carries a gene that turns one cooperative act on or off. Eight teams of eight drones evolve for eight generations under four kinds of selection; a filled circle is a drone that carries the gene.</span></div>
+        <div class="seg sel-studies"></div>
+      </div>
+      <div class="sel-regimes" aria-label="Kind of selection"></div>
+      <div class="sel-scrub"><span class="sel-gen" aria-live="polite">Generation 8 of 8</span><input class="sel-range" id="sel-range" type="range" min="0" max="8" step="1" value="8" aria-label="Generation"><div class="sel-runs"></div><button type="button" class="sel-play" id="sel-play">Play the generations</button></div>
+      <div class="sel-body"><div class="sel-teams"></div><div class="sel-chart"></div></div>
+      <p class="sel-note"></p>
+    </div>
+    <p class="evo-source reveal">Every design, score and gene shown here is read from the stored runs of the evolution studies. A mutant's parent is found by replaying the run's random draws, which reproduces every stored population. <button type="button" class="link zoom" data-full="media/ed_fig1.png">Extended Data Fig. 1</button></p>
   </div>
 </section>
 
@@ -334,5 +368,7 @@ python -m pytest</code></pre>
 <script src="js/site.js"></script>
 <script src="data/results.js"></script>
 <script src="js/charts.js"></script>
+<script src="data/evolution.js"></script>
+<script src="js/evolution.js"></script>
 </body>
 </html>
