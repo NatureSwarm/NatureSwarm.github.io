@@ -226,6 +226,9 @@ pre { margin: 0; padding: 20px 22px; overflow-x: auto; font-size: 13.5px; line-h
 .person-card div > span:not(.role) { display: block; }
 .person-card .avatar { flex: none; width: 50px; height: 50px; font-size: 15px; color: #fff; }
 .avatar.core { background: var(--teal); } .avatar.mid { background: #5e8f86; } .avatar.adv { background: #24558f; }
+.person-card img.avatar { display: block; object-fit: cover; background: #e6efeb; }
+.person-card b a { color: inherit; text-decoration: none; background: linear-gradient(var(--teal), var(--teal)) 0 100% / 100% 1.5px no-repeat; padding-bottom: 1px; transition: color 0.15s ease; }
+.person-card b a:hover { color: var(--teal-d); }
 .role { display: inline-block; margin: 6px 6px 0 0; padding: 2px 9px; border-radius: 999px; background: #e6f1ee; color: var(--teal-d) !important; font-size: 11.5px !important; font-weight: 700; }
 .corr { margin-top: 30px; text-align: center; font-size: 15px; }
 .mail { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; color: var(--ink); user-select: all; }
