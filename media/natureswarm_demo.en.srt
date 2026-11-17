@@ -1,0 +1,151 @@
+1
+00:00:00,600 --> 00:00:02,957
+Language models now work in teams.
+
+2
+00:00:03,307 --> 00:00:06,709
+How should a team of hundreds, or a thousand, be organized?
+
+3
+00:00:08,133 --> 00:00:14,380
+Most multi-agent systems rely on a coordinator:
+one agent that reads every report and gives every order.
+
+4
+00:00:14,730 --> 00:00:18,375
+Honeybee swarms, ant colonies
+and bird flocks work differently.
+
+5
+00:00:18,725 --> 00:00:22,289
+They coordinate through local interactions,
+with no one directing the whole.
+
+6
+00:00:23,700 --> 00:00:26,858
+A honeybee swarm chooses its new home without a leader.
+
+7
+00:00:27,208 --> 00:00:31,457
+Scouts inspect cavities themselves
+and dance longer for better ones.
+
+8
+00:00:31,807 --> 00:00:35,104
+When enough scouts gather at one cavity, the swarm commits.
+
+9
+00:00:35,454 --> 00:00:39,611
+We borrow first-hand reports,
+graded advertising and commitment by quorum.
+
+10
+00:00:41,033 --> 00:00:43,727
+Ants mark the paths they walk, and the marks fade.
+
+11
+00:00:44,077 --> 00:00:47,920
+A shorter path is renewed faster,
+so the colony converges on it.
+
+12
+00:00:48,270 --> 00:00:51,474
+We borrow shared marks that lose
+their hold unless they are renewed.
+
+13
+00:00:52,900 --> 00:00:55,988
+In a flock, each bird follows only its nearest neighbours.
+
+14
+00:00:56,338 --> 00:01:00,855
+A few birds that know the way can guide the rest,
+and none flies alone past the hawks.
+
+15
+00:01:01,205 --> 00:01:04,293
+We borrow relay between neighbours, with no central store.
+
+16
+00:01:05,700 --> 00:01:12,167
+We tested a coordinator against designs built on these mechanisms,
+on the same tasks, in three test beds.
+
+17
+00:01:12,517 --> 00:01:19,158
+Teams grew to 1,024 language-model agents,
+hubs failed, and model calls took time.
+
+18
+00:01:20,567 --> 00:01:27,765
+Here are two recorded episodes of a wildfire rescue
+with 128 drones, run by the same language model.
+
+19
+00:01:28,115 --> 00:01:30,948
+On the left, a coordinator assigns every drone.
+
+20
+00:01:31,298 --> 00:01:35,860
+On the right, NatureSwarm: each drone
+decides from what nearby drones relay.
+
+21
+00:01:36,210 --> 00:01:42,277
+The coordinator's team rescued 69% of the victims.
+NatureSwarm rescued 93%.
+
+22
+00:01:43,700 --> 00:01:46,126
+The paper's main result shows the same pattern.
+
+23
+00:01:46,476 --> 00:01:53,315
+With 128 drones, coordinators run by smaller
+language models saved 41% of victims.
+
+24
+00:01:53,665 --> 00:01:57,949
+Drones using insect-inspired mechanisms saved 79%.
+
+25
+00:01:59,367 --> 00:02:04,847
+The decline came from assigning work across the whole team,
+far more than from reading longer prompts.
+
+26
+00:02:05,197 --> 00:02:12,290
+A simple law fitted on small teams predicted it:
+15 of 17 results in larger teams fell inside its range.
+
+27
+00:02:13,700 --> 00:02:22,082
+With 1,024 drones, NatureSwarm run by a small model came close
+to a frontier model's coordinator at under a third of the price.
+
+28
+00:02:22,432 --> 00:02:26,937
+Once model calls took time, NatureSwarm
+outperformed even that coordinator.
+
+29
+00:02:27,287 --> 00:02:30,956
+It also kept teams working when radio links or the base failed.
+
+30
+00:02:32,367 --> 00:02:35,211
+Every animation in this video is a recorded episode.
+
+31
+00:02:35,561 --> 00:02:43,735
+The release includes the three test beds, every design,
+the experiment scripts, and this viewer, which plays any episode step by step.
+
+32
+00:02:45,167 --> 00:02:49,311
+Mechanisms borrowed from nature help
+where central control reaches its limits.
+
+33
+00:02:49,661 --> 00:02:52,901
+And a law fitted on small teams indicates where those limits lie.

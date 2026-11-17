@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NatureSwarm episode viewer</title>
+<meta name="description" content="Recorded episodes of NatureSwarm and its baselines: wildfire rescue teams of 8 to 512 drones run by language models, and the bee, ant and bird missions of NatureEnv.">
+<meta name="author" content="The NatureSwarm authors">
+<link rel="icon" type="image/png" href="media/brand/favicon_48.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/viewer.css">
+</head>
+<body>
+<header class="nav scrolled" id="nav">
+  <a class="brand" href="index.html"><img src="media/brand/logo_192.png" alt="" width="44" height="44"><span>NatureSwarm</span></a>
+  <nav class="links" aria-label="Pages"><a href="index.html">Project page</a><a class="active" href="viewer.html">Episode viewer</a></nav>
+  <div class="nav-cta"><a class="pill solid" href="index.html#demos">Demos</a></div>
+</header>
+
+<div class="vw">
+  <aside class="vw-list" aria-label="Recorded episodes">
+    <div class="vw-list-head">
+      <h1>Episode viewer</h1>
+      <p><span id="count">Recorded</span> episodes. Each one is a recording: positions, orders, fire and scores are read from the trace, and the text under the player says where the trace comes from.</p>
+      <select class="vw-pick" id="pick" aria-label="Choose an episode"></select>
+    </div>
+    <div class="vw-scroll" id="list"></div>
+  </aside>
+
+  <main class="vw-main">
+    <figure class="vw-player" id="stage">
+      <div class="vw-title">
+        <span class="vw-kicker" id="kicker"><i></i><span>Loading</span></span>
+        <div class="vw-tags" id="tags"></div>
+        <h2 id="title">&nbsp;</h2>
+      </div>
+      <div class="vw-stage">
+        <canvas aria-label="Episode animation"></canvas>
+        <div class="vw-wait" id="wait">Loading the recording…</div>
+      </div>
+      <div class="vw-controls">
+        <button class="pp" id="pp" aria-label="Play or pause">▶</button>
+        <input id="pos" type="range" min="0" max="1000" value="0" aria-label="Position">
+        <span id="clock">0.0 s</span>
+        <div class="vw-speed" id="speed" role="group" aria-label="Speed"><button data-s="0.5">0.5×</button><button data-s="1" class="on">1×</button><button data-s="2">2×</button></div>
+        <div class="vw-nav" role="group" aria-label="Previous or next episode"><button id="prev" aria-label="Previous episode">‹</button><button id="next" aria-label="Next episode">›</button></div>
+      </div>
+      <p class="vw-what" id="about"></p>
+    </figure>
+
+    <div class="vw-cols">
+      <section class="vw-card">
+        <h3>Teams and outcome</h3>
+        <div class="vw-teams" id="teams"></div>
+        <dl class="vw-facts" id="facts"></dl>
+      </section>
+      <section class="vw-card">
+        <h3>How it was recorded</h3>
+        <p id="method"></p>
+        <div id="evbox"><h3 style="margin-top:14px">Events</h3><ul class="vw-events" id="events"></ul></div>
+      </section>
+      <section class="vw-card">
+        <h3>Open your own trace</h3>
+        <input id="file" type="file" accept=".json,application/json" multiple aria-label="Open trace files">
+        <p>Open one trace, or two traces of the same world to play them side by side. Traces are written by <code>scripts/viz/trace_record.py</code>; the bundled ones by <code>scripts/viz/make_viewer_demos.py</code>.</p>
+      </section>
+      <section class="vw-card">
+        <h3>Keys</h3>
+        <p class="vw-keys"><kbd>Space</kbd> play or pause &nbsp; <kbd>←</kbd> <kbd>→</kbd> step back or forward &nbsp; <kbd>[</kbd> <kbd>]</kbd> previous or next episode</p>
+        <p class="vw-keys">A link to this page ending in <code>#</code> and an episode's name opens that episode.</p>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="js/natureswarm-player.js"></script>
+<script src="js/trace-pack.js"></script>
+<script>
+(function () {
+  'use strict';
+  // Shown until traces/demos.json has loaded, and if it cannot be read: the recordings of the project page.
+  const FALLBACK = {
+    groups: [{ id: 'rescue', title: 'Wildfire rescue', note: 'RescueEnv · stored episodes run by language models' }, { id: 'bees', title: 'Honeybees choose a nest site', note: 'NatureEnv' }, { id: 'ants', title: 'Ants and their trails', note: 'NatureEnv' }, { id: 'birds', title: 'Birds on migration', note: 'an illustration' }],
+    episodes: [
+      { id: 'rescue-128', group: 'rescue', name: '128 drones: coordinator against NatureSwarm', traces: ['traces/rescue_coordinator.json', 'traces/rescue_natureswarm.json'], tags: ['128 drones'], about: '', opts: { titles: ['Coordinator', 'NatureSwarm (neighbour-only)'], headline: 'Wildfire rescue with 128 drones', subline: 'Same map, same fire, same language model in both teams' } },
+      { id: 'bees-static', group: 'bees', name: 'Seven cavities, 24 scouts', traces: ['traces/bees.json'], tags: [], about: '', opts: {} },
+      { id: 'ants-static', group: 'ants', name: 'Three paths, 24 ants', traces: ['traces/ants.json'], tags: [], about: '', opts: {} },
+      { id: 'birds-f30', group: 'birds', name: 'Flock against solitary birds', traces: ['traces/birds_flock.json', 'traces/birds_alone.json'], tags: [], about: '', opts: { titles: ['Flock: every bird aligns with its seven nearest neighbours', 'Each bird on its own'] } },
+      { id: 'birds-f30-flock', group: 'birds', name: 'The flock alone', traces: ['traces/birds_flock.json'], tags: [], about: '', opts: {} },
+    ],
+  };
+  const GROUP_COLOR = { rescue: '#c8503f', bees: '#e7a21b', forage: '#3d9a57', ants: '#d6336c', birds: '#2f7fc1', hard: '#6b4fa3' };
+  const TEAM_COLOR = ['#1f5fae', '#b5367a', '#17766b'];
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const canvas = document.querySelector('#stage canvas');
+  const cache = {};
+  let DATA = FALLBACK, player = null, speed = 1, current = -1, ticket = 0;
+
+  const fetchTrace = (u) => cache[u] || (cache[u] = fetch(u).then((r) => { if (!r.ok) throw new Error(u + ': ' + r.status); return r.json(); }).then(NatureSwarmTrace.unpack));
+  const MODELS = { 'gemini-2.5-flash-lite': 'Gemini 2.5 Flash-Lite', 'gemini-3.1-flash-lite': 'Gemini 3.1 Flash-Lite', 'gemini-4-argon': 'Gemini 4 Argon', 'or/openai/gpt-oss-20b': 'gpt-oss 20B' };
+  const DESIGNS = { bee: 'Bee design', ant: 'Ant design', hierarchy: 'Coordinator', solitary: 'Solitary agents', flock: 'Flock design', broadcast: 'Broadcast', 'flock (three-rule model)': 'Flock (three-rule model)', 'each bird alone': 'Each bird on its own' };
+  const runBy = (m) => { if (m.policy === 'rule') return (/alone/.test(m.design) ? "each bird's own cue" : 'the three-rule flock model') + ', an illustration'; if (m.policy === 'classic') return "the design's model-free rule, no language model"; const id = String(m.policy).replace('llm:', ''); return MODELS[id] || id; };
+
+  function outcome(m) {
+    const o = m.outcome || {};
+    if (m.scene === 'rescue' || m.env === 'rescueenv') return [Math.round(100 * o.rescued / o.victims) + '%', `${o.rescued} of ${o.victims} victims rescued, ${o.drones_lost} of ${m.n_agents} drones lost`];
+    if (m.scene === 'bees') { const L = (k) => (k == null ? 'none' : String.fromCharCode(65 + k)); return [o.chose_best ? 'best cavity' : 'cavity ' + L(o.chosen), `chose cavity ${L(o.chosen)} in round ${o.round} (${o.how}); the best was cavity ${L(o.best)}`]; }
+    if (m.scene === 'ants') return [String(o.food), 'units of food brought home'];
+    if (m.scene === 'forage') return [String(o.food), 'units of food brought home' + (o.rival_food != null ? `; the other colony brought ${o.rival_food}` : '')];
+    if (m.scene === 'birds') return [`${o.arrived} / ${m.n_agents}`, `birds arrived, ${o.lost} taken by hawks`];
+    return ['', Object.keys(o).filter((k) => k !== 'trips').map((k) => k + ' ' + o[k]).join(', ')];
+  }
+
+  function show(traces, entry) {
+    const opts = entry.opts || {};
+    if (player) player.pause();
+    player = NatureSwarmPlayer.mount(canvas, traces.length === 1 ? traces[0] : traces, opts);
+    player.speed = speed;
+    const anyEvents = traces[0].frames.some((f) => f.events && f.events.length);
+    $('evbox').style.display = anyEvents ? '' : 'none';
+    player.onframe = (t, d) => {
+      if (!$('pos').matches(':active')) $('pos').value = String(Math.round(1000 * t / d));
+      $('clock').textContent = t.toFixed(1) + ' / ' + d.toFixed(1) + ' s';
+      if (!anyEvents) return;
+      const fr = traces[0].frames, k = Math.min(fr.length - 1, Math.floor(fr.length * t / d)), seen = [];
+      for (let i = k; i >= 0 && seen.length < 4; i--) (fr[i].events || []).forEach((e) => { if (seen.indexOf(e) < 0) seen.push(e); });
+      const html = seen.map((e) => '<li>' + esc(e) + '</li>').join('') || '<li>none yet</li>';
+      if ($('events').innerHTML !== html) $('events').innerHTML = html;
+    };
+    $('teams').innerHTML = traces.map((tr, i) => {
+      const m = tr.meta, o = outcome(m), c = (opts.colors && opts.colors[i]) || (traces.length > 1 ? TEAM_COLOR[i % 3] : '#17766b');
+      const name = (opts.titles && opts.titles[i]) || DESIGNS[m.design] || m.design;
+      return `<div class="vw-team" style="--c:${esc(c)}"><i></i><b>${esc(name)}</b><em>${esc(o[0])}</em><span>run by ${esc(runBy(m))} · ${esc(o[1])}</span></div>`;
+    }).join('');
+    const m0 = traces[0].meta, facts = [['test bed', m0.env === 'rescueenv' ? 'RescueEnv' : 'NatureEnv'], ['mission or world', m0.mission], ['seed', m0.seed], ['agents per team', m0.n_agents], ['frames', traces[0].frames.length]];
+    if (m0.time) facts.push(['time', m0.time]);
+    if (m0.source) facts.push(['source', traces.map((t) => t.meta.source).filter((s, i, a) => s && a.indexOf(s) === i).join('; ')]);
+    $('facts').innerHTML = facts.map((r) => '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>').join('');
+    player.render(0); player.play(); $('pp').textContent = '❚❚';
+  }
+
+  function describe(entry) {
+    const g = DATA.groups.find((x) => x.id === entry.group) || { title: '', method: '' };
+    $('stage').style.setProperty('--g', GROUP_COLOR[entry.group] || '#17766b');
+    $('kicker').lastElementChild.textContent = g.title || 'Your trace';
+    $('title').textContent = entry.name;
+    $('tags').innerHTML = (entry.tags || []).map((t) => '<span>' + esc(t) + '</span>').join('');
+    $('about').textContent = entry.about || '';
+    $('method').textContent = entry.method || g.method || 'A trace opened from a file: the player draws what the file holds.';
+  }
+
+  function select(i, push) {
+    const entry = DATA.episodes[i]; if (!entry) return;
+    current = i; const mine = ++ticket;
+    describe(entry);
+    Array.from(document.querySelectorAll('.vw-item')).forEach((b) => { const on = +b.dataset.i === i; b.classList.toggle('on', on); if (on) { b.setAttribute('aria-current', 'true'); if (b.scrollIntoView) b.scrollIntoView({ block: 'nearest' }); } else b.removeAttribute('aria-current'); });
+    $('pick').value = String(i);
+    if (push !== false) { try { history.replaceState(null, '', '#' + entry.id); } catch (e) { /* sandboxed frame */ } }
+    $('wait').textContent = 'Loading the recording…'; $('wait').classList.add('on');
+    Promise.all(entry.traces.map(fetchTrace)).then((t) => { if (mine !== ticket) return; $('wait').classList.remove('on'); show(t, entry); })
+      .catch((e) => { if (mine === ticket) $('wait').textContent = 'This recording could not be loaded (' + e.message + ').'; });
+  }
+
+  function build() {
+    const list = $('list'), pick = $('pick'); list.innerHTML = ''; pick.innerHTML = '';
+    $('count').textContent = String(DATA.episodes.length) + ' recorded';
+    DATA.groups.forEach((g) => {
+      const eps = DATA.episodes.map((e, i) => [e, i]).filter((x) => x[0].group === g.id); if (!eps.length) return;
+      const box = document.createElement('div'); box.className = 'vw-group'; box.style.setProperty('--g', GROUP_COLOR[g.id] || '#17766b');
+      box.innerHTML = `<div class="vw-group-head"><i></i><b>${esc(g.title)}</b><span>${eps.length}</span></div><p class="vw-group-note">${esc(g.note || '')}</p>`;
+      const og = document.createElement('optgroup'); og.label = g.title;
+      eps.forEach(([e, i]) => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'vw-item'; b.dataset.i = String(i);
+        b.innerHTML = `<strong>${esc(e.name)}</strong><small>${esc((e.tags || []).filter((t) => !/^seed /.test(t)).join(' · '))}</small>`;
+        b.addEventListener('click', () => select(i)); box.appendChild(b);
+        const o = document.createElement('option'); o.value = String(i); o.textContent = e.name; og.appendChild(o);
+      });
+      list.appendChild(box); pick.appendChild(og);
+    });
+  }
+  function start() {
+    build();
+    const want = decodeURIComponent((location.hash || '').slice(1)), k = DATA.episodes.findIndex((e) => e.id === want);
+    select(k >= 0 ? k : 0, false);
+  }
+
+  $('pick').addEventListener('change', () => select(+$('pick').value));
+  $('prev').addEventListener('click', () => select((current - 1 + DATA.episodes.length) % DATA.episodes.length));
+  $('next').addEventListener('click', () => select((current + 1) % DATA.episodes.length));
+  $('file').addEventListener('change', () => {
+    const files = Array.from($('file').files).slice(0, 2); if (!files.length) return;
+    Promise.all(files.map((f) => f.text().then(JSON.parse).then(NatureSwarmTrace.unpack))).then((t) => {
+      ticket++; current = -1; Array.from(document.querySelectorAll('.vw-item.on')).forEach((b) => b.classList.remove('on'));
+      const entry = { group: '', name: files.map((f) => f.name).join(' and '), tags: ['opened from a file'], about: 'A trace opened from your computer; it is not uploaded anywhere.', opts: { titles: t.map((x) => x.meta.design) } };
+      describe(entry); $('wait').classList.remove('on'); show(t, entry);
+    }).catch((e) => { $('wait').textContent = 'This file is not a trace (' + e.message + ').'; $('wait').classList.add('on'); });
+  });
+  const toggle = () => { if (!player) return; player.toggle(); $('pp').textContent = player.playing ? '❚❚' : '▶'; };
+  $('pp').addEventListener('click', toggle); canvas.addEventListener('click', toggle);
+  $('pos').addEventListener('input', () => { if (player) player.seek($('pos').value / 1000); });
+  $('speed').addEventListener('click', (e) => { const s = e.target.dataset.s; if (!s) return; speed = +s; if (player) player.speed = speed; Array.from($('speed').children).forEach((b) => b.classList.toggle('on', b === e.target)); });
+  document.addEventListener('keydown', (e) => {
+    if (/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(e.target.tagName) && e.key !== '[' && e.key !== ']') return;
+    if (e.key === ' ') { e.preventDefault(); toggle(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { if (!player) return; e.preventDefault(); player.pause(); $('pp').textContent = '▶'; player.seek((player.time + (e.key === 'ArrowLeft' ? -0.3 : 0.3)) / player.duration); }
+    else if (e.key === '[') $('prev').click(); else if (e.key === ']') $('next').click();
+  });
+  window.addEventListener('hashchange', () => { const k = DATA.episodes.findIndex((e) => e.id === decodeURIComponent(location.hash.slice(1))); if (k >= 0 && k !== current) select(k, false); });
+
+  fetch('traces/demos.json').then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
+    .then((d) => { if (d && d.episodes && d.episodes.length) DATA = d; }).catch(() => { /* keep the short list */ }).then(start);
+})();
+</script>
+</body>
+</html>

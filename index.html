@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NatureSwarm</title>
+<meta name="description" content="Mechanisms borrowed from honeybee swarms, ant colonies and bird flocks, tested against a coordinator in teams of up to 1,024 language-model agents.">
+<meta name="author" content="Kunlun Zhu, Hongyi Du, Junyu Lu, Zhongzhu Zhou, Malavika Venu, Xiangru Tang, Xiaomin Li, Pan Lu, Shang Zhu, Jiaxuan You, James Zou, Heng Ji and Gene Robinson">
+<link rel="icon" type="image/png" href="media/brand/favicon_48.png">
+<link rel="apple-touch-icon" href="media/brand/apple_touch_180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/charts.css">
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <a class="brand" href="#top"><img src="media/brand/logo_192.png" alt="" width="44" height="44"><span>NatureSwarm</span></a>
+  <nav class="links" aria-label="Sections">
+    <a href="#overview">Overview</a>
+    <a href="#demos">Demos</a>
+    <a href="#findings">Findings</a>
+    <a href="#method">Method</a>
+    <a href="#video">Video</a>
+    <a href="#code">Code</a>
+    <a href="#team">Team</a>
+  </nav>
+  <div class="nav-cta">
+    <a class="pill ghost" href="#cite">Cite</a>
+    <a class="pill solid" href="viewer.html">Episode viewer</a>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="hero">
+  <div class="hero-art" aria-hidden="true"></div>
+  <canvas id="hero-swarm" aria-hidden="true"></canvas>
+  <div class="hero-inner">
+    <p class="eyebrow"><span class="dot"></span>Research project · manuscript in preparation</p>
+    <h1>NatureSwarm: nature‑inspired coordination for teams of language‑model agents</h1>
+    <p class="lede">Honeybee swarms, ant colonies and bird flocks coordinate with no one directing the whole. We test their mechanisms against a central coordinator in teams of up to 1,024 language-model agents.</p>
+    <p class="hero-cta"><a class="btn primary" href="#demos">Explore the demos<svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></p>
+    <p class="hero-links">
+      <span class="chip off" title="The manuscript is in preparation"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M5 2.5h7l3.5 3.5v11.5H5z M12 2.5V6h3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Paper, soon</span>
+      <a class="chip" href="#code"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M7 6l-4 4 4 4M13 6l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Code</a>
+      <a class="chip" href="#video"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M7 5.5v9l7-4.5z" fill="currentColor"/></svg>Video</a>
+      <a class="chip dl" href="media/natureswarm_promo.pptx" download><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><rect x="3" y="4" width="14" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10 14v3M7 17h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Slides</a>
+      <a class="chip" href="viewer.html"><svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><circle cx="10" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2 10c2-4 5-6 8-6s6 2 8 6c-2 4-5 6-8 6s-6-2-8-6z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Episode viewer</a>
+    </p>
+    <p class="byline">Kunlun Zhu, Hongyi Du, Junyu Lu, Zhongzhu Zhou, Malavika Venu, Xiangru Tang, Xiaomin Li, Pan Lu, Shang Zhu, Jiaxuan You, James Zou, Heng Ji, Gene Robinson</p>
+    <p class="affil">University of Illinois Urbana-Champaign · Together AI · Google · MatriAIx · Harvard University · Stanford University</p>
+  </div>
+</section>
+
+<section class="facts" aria-label="At a glance">
+  <div class="wrap facts-row">
+    <div><b>3</b><span>test beds</span></div>
+    <div><b>24</b><span>NatureEnv missions</span></div>
+    <div><b>8 to 1,024</b><span>drones in RescueEnv</span></div>
+    <div><b>15</b><span>language models</span></div>
+  </div>
+</section>
+
+<section class="orgs" aria-label="Authors' affiliations">
+  <div class="wrap orgs-row">
+    <span class="orgs-label">The authors' affiliations</span>
+    <ul>
+      <li><img src="media/orgs/illinois.svg" alt="University of Illinois Urbana-Champaign" height="36"></li>
+      <li class="together"><img src="media/orgs/together_mark.png" alt="" height="30"><span>together.ai</span></li>
+      <li><img src="media/orgs/google.svg" alt="Google" height="28"></li>
+      <li class="word"><span>MatriAIx</span></li>
+      <li><img src="media/orgs/harvard.svg" alt="Harvard University" height="38"></li>
+      <li><img src="media/orgs/stanford.svg" alt="Stanford University" height="26"></li>
+    </ul>
+  </div>
+</section>
+
+<section id="overview" class="band">
+  <div class="wrap">
+    <div class="split reveal">
+      <div>
+        <p class="label">The question</p>
+        <h2 class="light">Do mechanisms that evolved without a coordinator still help when one is available?</h2>
+      </div>
+      <div class="prose">
+        <p>Many multi-agent systems of large language models rely on a <strong>coordinator</strong>, one agent that reads every report and gives every order. Its work grows with its team: with 128 drones it must read 128 reports and, in a single reply, assign every idle drone without overstaffing any site.</p>
+        <p>Animal groups never had this option, because no animal can read every report from its group. A language-model system can. We therefore compare a coordinator with designs built on mechanisms of natural collectives on the same tasks, and we introduce <strong>NatureSwarm</strong>, a decentralized design that combines several of these mechanisms.</p>
+      </div>
+    </div>
+
+    <div class="cards three reveal">
+      <article class="card lift">
+        <div class="glyph" data-glyph="load"></div>
+        <h3>Load</h3>
+        <p>A coordinator reads the whole team's reports. In a natural collective each member reads only what is near it.</p>
+      </article>
+      <article class="card lift">
+        <div class="glyph" data-glyph="timing"></div>
+        <h3>Timing</h3>
+        <p>Drones under a coordinator wait for its reply while the fire spreads. In a collective no member waits for an order.</p>
+      </article>
+      <article class="card lift">
+        <div class="glyph" data-glyph="robust"></div>
+        <h3>Robustness</h3>
+        <p>Every report and every order passes through the hub. In a collective no single member can stall the group.</p>
+      </article>
+    </div>
+
+    <div class="lab reveal" id="lab">
+      <div class="lab-text">
+        <p class="label">Try it</p>
+        <h3>One hub, or many neighbours</h3>
+        <p>Switch the organization, change the team size and silence the hub. The picture is a schematic of the two organizations, not a recorded episode.</p>
+        <div class="seg" role="tablist" aria-label="Organization">
+          <button type="button" class="on" data-mode="hub" role="tab" aria-selected="true">Coordinator</button>
+          <button type="button" data-mode="swarm" role="tab" aria-selected="false">NatureSwarm</button>
+        </div>
+        <label class="range"><span>Team size <b id="lab-n">32</b></span><input id="lab-size" type="range" min="0" max="4" step="1" value="2" aria-label="Team size"></label>
+        <button type="button" class="btn outline" id="lab-fail">Silence the hub</button>
+        <dl class="readout">
+          <div><dt>What the deciding agent reads</dt><dd id="lab-reads">32 reports</dd></div>
+          <div><dt>What it writes in one reply</dt><dd id="lab-writes">32 orders</dd></div>
+          <div><dt>If the hub falls silent</dt><dd id="lab-fate">no drone gets orders</dd></div>
+        </dl>
+      </div>
+      <div class="lab-stage"><canvas id="lab-canvas" width="720" height="520" aria-label="Schematic of a coordinator and of a neighbour network"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<section class="band sky" aria-label="Key numbers">
+  <div class="wrap stats reveal">
+    <div class="stat"><p class="num"><span data-count="1024">1,024</span></p><h3>agents in the largest teams</h3><p>A coordinator and decentralized designs on the same task.</p></div>
+    <div class="stat"><p class="num"><span data-count="41">41</span>%<i>→</i><span data-count="79">79</span>%</p><h3>victims saved with 128 drones</h3><p>Coordinators run by smaller models, against drones using insect-inspired mechanisms.</p></div>
+    <div class="stat"><p class="num"><span data-count="15">15</span><i>of</i><span data-count="17">17</span></p><h3>results inside the predicted range</h3><p>A law fitted on small teams predicted the decline in larger ones.</p></div>
+  </div>
+</section>
+
+<section id="demos" class="band">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="label">Recorded episodes</p>
+      <h2>See the mechanisms at work</h2>
+      <p class="sub">Every animation plays a recorded episode; positions, fire and scores are read from the recording.</p>
+    </div>
+    <div class="showcase reveal" id="showcase">
+      <div class="tabs" role="tablist" aria-label="Episodes">
+        <span class="tab-ink" aria-hidden="true"></span>
+        <button type="button" role="tab" class="on" data-demo="rescue" aria-selected="true">Wildfire rescue</button>
+        <button type="button" role="tab" data-demo="bees" aria-selected="false">Honeybees</button>
+        <button type="button" role="tab" data-demo="ants" aria-selected="false">Ants</button>
+        <button type="button" role="tab" data-demo="birds" aria-selected="false">Birds</button>
+      </div>
+      <div class="stage">
+        <div class="screen"><canvas id="demo-canvas" aria-label="Animation of a recorded episode"></canvas><div class="loading" id="demo-loading">Loading the episode…</div></div>
+        <div class="controls">
+          <button type="button" class="ctl" id="demo-play" aria-label="Play or pause"><svg viewBox="0 0 20 20" width="18" height="18"><path id="demo-play-icon" d="M6 4h3v12H6zM11 4h3v12h-3z" fill="currentColor"/></svg></button>
+          <button type="button" class="ctl" id="demo-restart" aria-label="Start again"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 10a6 6 0 1 0 2-4.5M4 3.5v3h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <input type="range" id="demo-scrub" min="0" max="1000" value="0" aria-label="Position in the episode">
+          <span class="time" id="demo-time">0.0 s</span>
+          <div class="speed" id="demo-speed" role="group" aria-label="Speed"><button type="button" data-s="0.5">0.5×</button><button type="button" class="on" data-s="1">1×</button><button type="button" data-s="2">2×</button></div>
+        </div>
+      </div>
+      <div class="about" id="demo-about" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<section id="findings" class="band sage">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="label">Findings</p>
+      <h2>A coordinator leads while its orders stay consistent and timely</h2>
+      <p class="sub">Mechanisms from natural collectives overtake it where it cannot keep them so, or where it fails.</p>
+    </div>
+    <article class="finding reveal">
+      <div class="f-text"><span class="f-num">01</span><h3>As teams grew, coordinators run by smaller models fell behind</h3><p>Coordinators served small, reliable teams well. With 128 drones in the simulated wildfire rescue, coordinators run by smaller language models saved 41% of victims, whereas drones using insect-inspired mechanisms saved 79%.</p><p class="f-hint">Pick a language model, then point at the chart to read each design at a team size.</p></div>
+      <div class="chart-card" id="chart-scaling"></div>
+    </article>
+    <article class="finding flip reveal">
+      <div class="f-text"><span class="f-num">02</span><h3>The decline came from assigning work, far more than from reading</h3><p>Padding the prompt of an eight-drone coordinator to the lengths of larger teams cost little. The decline came from having to assign work across the whole team's options, and a similar decline appeared in a text task without a map.</p><p class="f-hint">The second view shows how long a prompt each design reads as its team grows.</p></div>
+      <div class="chart-card" id="chart-prompt"></div>
+    </article>
+    <article class="finding reveal">
+      <div class="f-text"><span class="f-num">03</span><h3>A law fitted on small teams predicted the decline in larger ones</h3><p>A simple law, which we call a span-of-control law, gave the team size at which nature-inspired mechanisms overtook a coordinator. Of 17 results in larger teams, 15 lay inside its predicted range.</p><p class="f-hint">Choose a model to see its fitted line, its prediction and each team that was run.</p></div>
+      <div class="chart-card" id="chart-law"></div>
+    </article>
+    <article class="finding stack reveal">
+      <div class="f-text"><span class="f-num">04</span><h3>With 1,024 drones, a small model's NatureSwarm came close at under a third of the price</h3><p>With 1,024 drones, NatureSwarm run by a small model came close to a frontier model's coordinator at under a third of the price.</p></div>
+      <div class="chart-pair">
+        <div class="chart-card" id="chart-frontier-rescued"></div>
+        <div class="chart-card" id="chart-frontier-price"></div>
+      </div>
+    </article>
+    <article class="finding flip reveal">
+      <div class="f-text"><span class="f-num">05</span><h3>When model calls took time or the hub failed, NatureSwarm led</h3><p>Once model calls took time, NatureSwarm outperformed even the frontier model's coordinator, and it kept teams working when radio links or the base failed.</p><p class="f-hint">Switch between slow calls and a silent base; the replay button runs the episode again.</p></div>
+      <div class="chart-card" id="chart-robust"></div>
+    </article>
+    <p class="chart-source reveal">Every chart draws the values plotted in the manuscript's figures. <button type="button" class="link zoom" data-full="media/fig2.png">Fig. 2</button> <button type="button" class="link zoom" data-full="media/fig3.png">Fig. 3</button> <button type="button" class="link zoom" data-full="media/fig4.png">Fig. 4</button></p>
+  </div>
+</section>
+
+<section id="method" class="band">
+  <div class="wrap">
+    <div class="head reveal">
+      <p class="label">Method</p>
+      <h2>Three test beds, one task per comparison</h2>
+      <p class="sub">The task stays the same while the organization changes and the team grows.</p>
+    </div>
+    <div class="cards three reveal">
+      <article class="card lift tb"><span class="tb-k">NatureEnv</span><h3>Decisions that animal groups face</h3><p>24 missions in four families: choosing a nest site, foraging along trails, competing for resources and migrating. Harder variants lose scouts, block paths, add rival colonies and hawks.</p></article>
+      <article class="card lift tb"><span class="tb-k">RescueEnv</span><h3>Drones in a wildfire</h3><p>Drones with limited battery charge and radio range search a burning area for victims. Teams grow from 8 to 128 drones, and the largest runs reach 1,024. A base station can fall silent and model calls can take time.</p></article>
+      <article class="card lift tb"><span class="tb-k">Text task</span><h3>A ring of cases</h3><p>Each agent must solve one theft case whose evidence is split between it and its two neighbours. It checks whether the findings depend on a map.</p></article>
+    </div>
+    <div class="designs reveal">
+      <div class="design"><span class="swatch c1"></span><h3>Coordinator</h3><p>The baseline common in multi-agent systems: one agent reads every report and directs the others.</p></div>
+      <div class="design"><span class="swatch c2"></span><h3>Eight single-mechanism designs</h3><p>Each is built on one mechanism of social insects, bird flocks, fish schools, wolf packs, slime moulds or fireflies. The simplest, response-threshold drones, lets each drone take the task whose need exceeds its own threshold, as honeybee workers start to fan the hive, each at its own temperature.</p></div>
+      <div class="design"><span class="swatch c3"></span><h3>NatureSwarm</h3><p>Every agent carries the team's record and decides for itself. Its mechanisms share, verify and forget: records pass from agent to agent, a report states what its sender saw, and old reports fade. It comes as team-wide, neighbour-only and adaptive NatureSwarm.</p></div>
+    </div>
+    <button type="button" class="wide-fig zoom reveal" data-full="media/fig1.png" aria-label="Enlarge the overview figure"><img loading="lazy" src="media/fig1.png" alt="Overview figure of the paper: the natural collectives, the designs and the three test beds"><span>Fig. 1 · the collectives, the designs and the test beds</span></button>
+  </div>
+</section>
+
+<section id="video" class="band sky">
+  <div class="wrap narrow reveal">
+    <div class="head">
+      <p class="label">Video</p>
+      <h2>The project in three minutes</h2>
+    </div>
+    <div class="video-shell">
+      <video id="demo-video" controls preload="none" poster="media/rescue_poster.png" data-en="media/natureswarm_demo.mp4" data-zh="media/natureswarm_demo_zh.mp4" src="media/natureswarm_demo.mp4"></video>
+    </div>
+    <p class="video-note">Narrated in English. Subtitles
+      <span class="seg small" id="video-sub"><button type="button" class="on" data-sub="en">English</button><button type="button" data-sub="zh">中文</button></span>
+      <a class="dl" href="media/natureswarm_demo.mp4" download>Download</a>
+    </p>
+  </div>
+</section>
+
+<section id="code" class="band">
+  <div class="wrap">
+    <div class="split reveal">
+      <div>
+        <p class="label">Code</p>
+        <h2 class="light">Run every design without an API key</h2>
+        <p class="prose-p">The release holds the three test beds, every design, scripts for the main experiments and the episode viewer. Each design has a model-free policy that reads the same prompts as a language-model agent, so episodes run offline.</p>
+        <p class="row-links"><a class="btn primary" href="viewer.html">Open the episode viewer</a><a class="btn outline" href="https://github.com/NatureSwarm/NatureSwarm" rel="noopener">Repository on GitHub</a></p>
+      </div>
+      <div class="terminal">
+        <div class="term-bar"><i></i><i></i><i></i><span>shell</span><button type="button" class="copy" data-copy="term-code">Copy</button></div>
+<pre id="term-code"><code>git clone https://github.com/NatureSwarm/NatureSwarm
+cd NatureSwarm &amp;&amp; pip install -e .
+natureswarm run rescue --design natureswarm --mission rescue-basefail
+natureswarm record bees --seed 2 -o viewer/traces/bees.json
+natureswarm experiment rescue-scaling --smoke
+natureswarm view
+python -m pytest</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="team" class="band">
+  <div class="wrap">
+    <div class="head reveal"><p class="label">Team</p><h2>The people behind NatureSwarm</h2></div>
+    <div class="team-group reveal"><h3>Core contributors</h3><div class="people">
+      <article class="person-card lift"><span class="avatar core">KZ</span><div><b>Kunlun Zhu</b><span>University of Illinois Urbana-Champaign</span><span class="role">Team lead</span><span class="role">Corresponding author</span></div></article>
+      <article class="person-card lift"><span class="avatar core">HD</span><div><b>Hongyi Du</b><span>University of Illinois Urbana-Champaign</span></div></article>
+      <article class="person-card lift"><span class="avatar core">JL</span><div><b>Junyu Lu</b><span>University of Illinois Urbana-Champaign</span></div></article>
+    </div></div>
+    <div class="team-group reveal"><h3>Contributors</h3><div class="people">
+      <article class="person-card lift"><span class="avatar mid">ZZ</span><div><b>Zhongzhu Zhou</b><span>Together AI</span></div></article>
+      <article class="person-card lift"><span class="avatar mid">MV</span><div><b>Malavika Venu</b><span>University of Illinois Urbana-Champaign</span></div></article>
+      <article class="person-card lift"><span class="avatar mid">XT</span><div><b>Xiangru Tang</b><span>Google</span></div></article>
+      <article class="person-card lift"><span class="avatar mid">XL</span><div><b>Xiaomin Li</b><span>MatriAIx · Harvard University</span></div></article>
+    </div></div>
+    <div class="team-group reveal"><h3>Advisory committee</h3><div class="people">
+      <article class="person-card lift"><span class="avatar adv">PL</span><div><b>Pan Lu</b><span>Stanford University</span></div></article>
+      <article class="person-card lift"><span class="avatar adv">SZ</span><div><b>Shang Zhu</b><span>Together AI</span></div></article>
+      <article class="person-card lift"><span class="avatar adv">JY</span><div><b>Jiaxuan You</b><span>University of Illinois Urbana-Champaign</span></div></article>
+      <article class="person-card lift"><span class="avatar adv">JZ</span><div><b>James Zou</b><span>Stanford University</span></div></article>
+      <article class="person-card lift"><span class="avatar adv">HJ</span><div><b>Heng Ji</b><span>University of Illinois Urbana-Champaign</span></div></article>
+      <article class="person-card lift"><span class="avatar adv">GR</span><div><b>Gene Robinson</b><span>University of Illinois Urbana-Champaign</span><span class="role">Corresponding author</span></div></article>
+    </div></div>
+    <p class="corr reveal">Correspondence: Kunlun Zhu, <span class="mail">kunlunz2@illinois.edu</span> · Gene Robinson, <span class="mail">generobi@illinois.edu</span></p>
+  </div>
+</section>
+
+<section id="cite" class="band sage">
+  <div class="wrap">
+    <div class="split reveal">
+      <div>
+        <p class="label">About</p>
+        <h2 class="light">Nature-inspired coordination helps multi-agent language-model systems where central control reaches its limits</h2>
+        <p class="prose-p">Kunlun Zhu, Hongyi Du, Junyu Lu, Zhongzhu Zhou, Malavika Venu, Xiangru Tang, Xiaomin Li, Pan Lu, Shang Zhu, Jiaxuan You, James Zou, Heng Ji and Gene Robinson.</p>
+        <p class="prose-p"><strong>Manuscript in preparation, 2026.</strong></p>
+      </div>
+      <div class="bib">
+        <div class="term-bar light"><span>BibTeX</span><button type="button" class="copy" data-copy="bib-code">Copy</button></div>
+<pre id="bib-code"><code>@unpublished{zhu2026natureswarm,
+  title  = {Nature-inspired coordination helps multi-agent
+            language-model systems where central control
+            reaches its limits},
+  author = {Zhu, Kunlun and Du, Hongyi and Lu, Junyu
+            and Zhou, Zhongzhu and Venu, Malavika and Tang, Xiangru
+            and Li, Xiaomin and Lu, Pan and Zhu, Shang
+            and You, Jiaxuan and Zou, James and Ji, Heng
+            and Robinson, Gene},
+  year   = {2026},
+  note   = {Manuscript in preparation}
+}</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="brand" href="#top"><img src="media/brand/logo_192.png" alt="" width="30" height="30"><span>NatureSwarm</span></a>
+    <p>© 2026 The NatureSwarm authors. Animations are played from recorded episodes by the same renderer as the episode viewer.</p>
+  </div>
+</footer>
+
+<button type="button" class="to-top" id="to-top" aria-label="Back to the top"><svg viewBox="0 0 20 20" width="18" height="18"><path d="M10 16V5M5 9l5-5 5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+
+<dialog class="lightbox" id="lightbox" aria-label="Figure"><button type="button" class="close" aria-label="Close">×</button><img alt=""></dialog>
+
+<script src="js/natureswarm-player.js"></script>
+<script src="js/site.js"></script>
+<script src="data/results.js"></script>
+<script src="js/charts.js"></script>
+</body>
+</html>
