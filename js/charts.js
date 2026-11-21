@@ -1,8 +1,11 @@
-/* NatureSwarm project page: interactive result charts.
-   Data: data/results.js (window.NS_RESULTS), the plotted values of Figs 2 to 4 of the manuscript, written by
-   scripts/viz/export_results.py. Nothing is computed here except pixel positions.
-   One small SVG chart component (lines, points, intervals, bands, hover read-out, legend, table view) and the
-   chart definitions of the Findings section. No dependencies. */
+/* NatureSwarm project page: interactive result charts and the small drawings near the top of the page.
+   Data: data/results.js (window.NS_RESULTS), the plotted values of the manuscript's figures and the stored results
+   behind them, written by scripts/viz/export_results.py; for the chart of finding 08, data/evolution.js
+   (window.NS_EVOLUTION). Nothing is computed here except pixel positions, a share shown as a percentage and, for two
+   drawings of the "results at a glance" row, the mean of the stored values of several models at each size.
+   One small SVG chart component (lines, points, intervals, bands, hover read-out, legend, table view) and the chart
+   definitions of the Findings section. Each chart sits in a finding card of index.html: what it plots, a reading note
+   and its data table go into the card's closed "Details"; the figure it comes from is a chip. No dependencies. */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
@@ -45,7 +48,9 @@
   }
 
   /* ------------------------------------------------------------------------------------------- the chart */
-  function Chart(host, spec) {
+  // opts.tableHost: an element that takes the data table (the "Details" of a finding); without it the chart keeps
+  // the table in a closed block of its own
+  function Chart(host, spec, opts) {
     var self = this;
     this.host = host; this.spec = spec; this.hidden = {}; this.drawn = false; this.cur = -1;
     host.textContent = '';
@@ -56,7 +61,8 @@
     this.frame.setAttribute('aria-label', spec.aria || '');
     this.tip = h('div', 'ct-tip', null, this.frame);
     this.tip.hidden = true;
-    this.tableBox = h('details', 'ct-data', null, host);
+    this.ownTable = !(opts && opts.tableHost);
+    this.tableBox = this.ownTable ? h('details', 'ct-data', null, host) : opts.tableHost;
     this.buildLegend();
     this.buildTable();
     this.render(false);
@@ -73,6 +79,8 @@
         en.forEach(function (x) { if (x.isIntersecting && !self.drawn) { self.drawn = true; self.animate(); io.disconnect(); } });
       }, { threshold: 0.3 });
       io.observe(host);
+      // a chart that the observer never reports (a print view, a host that is never 30% in view) is shown all the same
+      setTimeout(function () { if (!self.drawn) { self.drawn = true; io.disconnect(); self.render(false); } }, 9000);
     } else { this.drawn = true; }
   }
 
@@ -93,15 +101,17 @@
       b.setAttribute('aria-pressed', self.hidden[s.id] ? 'false' : 'true');
       b.title = 'Show or hide this series';
       b.appendChild(keySvg(s));
-      h('span', null, s.name, b);
+      h('span', null, s.key || s.name, b);
       b.addEventListener('click', function () {
         var left = self.visible().filter(function (t) { return t.name && t.legend !== false; }).length;
         if (!self.hidden[s.id] && left <= 1) return;
-        self.hidden[s.id] = !self.hidden[s.id];
-        b.setAttribute('aria-pressed', self.hidden[s.id] ? 'false' : 'true');
+        // a key that stands for a group of lines (one per population, say) shows and hides them together
+        var off = !self.hidden[s.id];
+        spec.series.forEach(function (t) { if (t.id === s.id || (s.group && t.group === s.group)) self.hidden[t.id] = off; });
+        b.setAttribute('aria-pressed', off ? 'false' : 'true');
         self.render(false);
       });
-      b.addEventListener('pointerenter', function () { self.emphasize(s.id); });
+      b.addEventListener('pointerenter', function () { self.emphasize(s.group || s.id); });
       b.addEventListener('pointerleave', function () { self.emphasize(null); });
     });
   };
@@ -116,7 +126,7 @@
   Chart.prototype.buildTable = function () {
     var spec = this.spec, box = this.tableBox;
     box.textContent = '';
-    h('summary', null, 'Data table', box);
+    if (this.ownTable) h('summary', null, 'Data table', box);
     var wrap = h('div', 'ct-table', null, box), table = h('table', null, null, wrap);
     var series = spec.series.filter(function (s) { return s.name && s.table !== false; });
     var xf = spec.x.fmt || num, yf = spec.y.fmt || function (v) { return num(v, 1); };
@@ -219,7 +229,7 @@
     this.paths = []; this.marks = [];
     var plot = el('g', { 'clip-path': 'url(#' + clipId + ')' }, svg);
     vis.forEach(function (s) {
-      var g = el('g', { 'data-series': s.id }, plot);
+      var g = el('g', { 'data-series': s.group || s.id }, plot);
       var pts = s.points.filter(function (p) { return p[1] !== null && p[1] !== undefined; });
       if (s.line !== false && pts.length > 1) {
         var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1); }).join('');
@@ -386,19 +396,36 @@
   };
 
   /* ---------------------------------------------------------------------------------- the card around a chart */
+  // a chip that opens the figure of the manuscript a chart comes from
+  var FIGFILE = [[/^Fig\. ([1-6])/, function (m) { return 'media/paper/fig' + m[1] + '.png'; }],
+    [/^Supplementary Fig\. 29/, function () { return 'media/paper/sfig29.png'; }], [/^Supplementary Fig\. 25/, function () { return 'media/ed_fig1.png'; }]];
+  function figChip(label, parent) {
+    var file = null;
+    FIGFILE.forEach(function (f) { var m = f[0].exec(label); if (m && !file) file = f[1](m); });
+    var b = h(file ? 'button' : 'span', 'figref', label, parent);
+    if (file) { b.type = 'button'; b.setAttribute('data-full', file); b.setAttribute('data-alt', label + ' of the manuscript'); }
+    return b;
+  }
+  /* A chart inside a finding card (index.html: article.fcard). The card shows the controls and the chart. What the
+     chart plots, the reading note and the data table go into the card's closed "Details" (.more-data); the figure
+     it comes from becomes a chip (.f-src). */
   function card(id, o) {
     var host = document.getElementById(id);
     if (!host) return null;
     host.textContent = '';
-    var head = h('div', 'cc-head', null, host);
-    var tt = h('div', 'cc-title', null, head);
-    var title = h('b', null, o.title, tt), sub = h('span', null, o.sub || '', tt);
-    var ctl = h('div', 'cc-controls', null, head);
+    var art = host.closest ? host.closest('.fcard') : null;
+    var data = (art && art.querySelector('.more-data')) || h('div', 'more-data', null, host.parentNode);
+    var srcBox = (art && art.querySelector('.f-src')) || h('span', 'f-src', null, host.parentNode);
+    var ctl = h('div', 'cc-controls', null, host);
     var body = h('div', 'cc-body', null, host);
-    var foot = h('div', 'cc-foot', null, host);
-    var note = h('span', 'cc-note', o.note || '', foot);
-    h('span', 'cc-src', o.source || '', foot);
-    return { host: host, head: head, controls: ctl, body: body, title: title, sub: sub, note: note };
+    data.textContent = '';
+    var what = h('p', 'cc-what', null, data);
+    var title = h('b', null, o.title, what), sub = h('span', null, o.sub || '', what);
+    var note = h('p', 'cc-note', o.note || '', data);
+    var table = h('div', 'cc-table', null, data);
+    function setSrc(label) { srcBox.textContent = ''; if (label) figChip(label, srcBox); }
+    setSrc(o.source || '');
+    return { host: host, controls: ctl, body: body, title: title, sub: sub, note: note, table: table, setSrc: setSrc };
   }
   function segmented(parent, label, options, onPick) {
     var box = h('div', 'seg', null, parent);
@@ -421,32 +448,69 @@
   };
   var PCT = function (lo, hi, ticks, label) { return { type: 'linear', domain: [lo, hi], ticks: ticks, label: label || 'Victims rescued (%)', fmt: function (v) { return num(v, 1) + '%'; } }; };
   function zip(xs, ys) { return xs.map(function (x, i) { return [x, ys[i]]; }); }
+  function meanAt(rows, i) { return rows.reduce(function (a, r) { return a + r[i]; }, 0) / rows.length; }
 
   function scalingSpec(m) {
     var argon = m.model === 'Gemini 4 Argon';
     var series = [{ id: 'c', name: 'Coordinator', label: 'Coordinator', color: C.coordinator, marker: 'circle', width: 2.6, points: zip(m.sizes, m.coordinator) }];
     if (m.matched) series.push({ id: 'm', name: 'Matched control', label: 'Matched control', color: C.coordinator, dash: '5 5', marker: 'circle', open: true, width: 1.8, points: zip(m.sizes, m.matched) });
     series.push({ id: 't', name: argon ? 'Response-threshold drones of the three smaller models' : 'Response-threshold drones', label: argon ? 'Response-threshold drones\n(three smaller models)' : 'Response-threshold\ndrones', tipName: 'Response-threshold drones', color: C.threshold, marker: 'triangle', dash: argon ? '5 5' : null, points: zip(m.sizes, m.threshold) });
-    series.push({ id: 'n', name: 'Neighbour-only NatureSwarm', label: 'Neighbour-only\nNatureSwarm', color: C.swarm, marker: 'diamond', points: zip(m.natureswarm.sizes, m.natureswarm.y) });
+    series.push({ id: 'n', name: 'NatureSwarm', label: 'NatureSwarm', color: C.swarm, marker: 'diamond', points: zip(m.natureswarm.sizes, m.natureswarm.y) });
     var dots = [];
     m.sizes.forEach(function (n) { (m.episodes[String(n)] || []).forEach(function (v, i) { dots.push({ x: n, y: v, jx: (i - 2.5) * 3.4, color: C.coordinator, series: 'c' }); }); });
     return { aria: 'Victims rescued against team size, ' + m.model, x: SIZE_AXIS([8, 16, 32, 64, 128], 6.6, 150), y: PCT(0, 100, [0, 25, 50, 75, 100]), series: series, dots: dots };
   }
 
   function build(R) {
-    // 01 scaling, one tab per model
-    var c1 = card('chart-scaling', { title: 'Victims rescued against team size', sub: 'Drone search and rescue; open dots, the coordinator’s six episodes at each size', source: 'Fig. 2d of the manuscript' });
+    // the figure a part of the data file comes from, as the chip shows it
+    var fig = function (key) { return R[key] && R[key].figure ? R[key].figure.split(' and ')[0] : ''; };
+
+    // 01 NatureEnv: the score of each design by mission family, the main study and the test on new seeds
+    var c0 = card('chart-natureenv', { title: 'NatureEnv score by mission family', sub: 'Six designs, eight language models; score from 0 to 100.', source: 'Fig. 3a' });
+    if (c0 && R.natureenv) {
+      var NE = R.natureenv;
+      var LOOK = { hierarchy: [C.coordinator, 'circle', false, 6.2], 'roost-v3': [C.swarm, 'diamond', false, 5.4], bee: [C.bee, 'triangle', false, 5.2], ant: [C.grey, 'square', false, 5], broadcast: [C.grey, 'down', true, 4.6],
+        solitary: [C.grey, 'circle', true, 4.6], flock: [C.grey, 'diamond', true, 4.4], board: [C.grey, 'square', true, 4.6] };
+      var SHORT = { nest: 'Nest', forage: 'Forag.', compete: 'Comp.', migrate: 'Migr.', all: 'All', '24 standard missions': 'All', 'nest-k7-liars': 'Liars', 'trail-block-early': 'Block' };
+      var neSpec = function (part) {
+        var rows = part.rows, name = function (v, short) { var r = rows[v - 1]; return !r ? '' : (short ? SHORT[r.key] || r.name : r.name); };
+        return { aria: 'NatureEnv score of each design by mission family', labels: false,
+          x: { type: 'linear', domain: [0.5, rows.length + 0.5], ticks: rows.map(function (r, i) { return i + 1; }), label: 'Mission family',
+            tick: function (v) { return name(v, c0.body.clientWidth < (rows.length > 5 ? 900 : 540)); }, fmt: function (v) { return name(v, false); }, tip: function (v) { return name(v, false); } },
+          y: { type: 'linear', domain: [25, 100], ticks: [25, 50, 75, 100], label: 'Score (0 to 100)', fmt: function (v) { return num(v, 1); } },
+          refs: rows.length > 5 ? [{ x: 5.5 }] : [],
+          // the designs of one family stand side by side, so that close scores do not hide each other
+          series: part.designs.map(function (d, j) { var k = LOOK[d] || [C.grey, 'circle', true, 4], dx = (j - (part.designs.length - 1) / 2) * (c0.body.clientWidth < 540 ? 6 : 11);
+            return { id: d, name: NE.names[d] || d, color: k[0], line: false, marker: k[1], open: k[2], size: k[3], points: rows.map(function (r, i) { return [i + 1, r.scores[d], { dx: dx }]; }) }; }) };
+      };
+      var allOf = function (part) { return part.rows.filter(function (r) { return r.key === 'all' || r.key === '24 standard missions'; })[0].scores; };
+      var views0 = [
+        { part: NE.main, title: 'NatureEnv score by mission family', sub: 'Six designs, eight language models; score from 0 to 100.',
+          note: 'All 24 missions: the coordinator scored ' + num(allOf(NE.main).hierarchy, 1) + ' and the runner-up, the bee design, ' + num(allOf(NE.main).bee, 1) + '.' },
+        { part: NE.held_out, title: 'NatureEnv score on new seeds', sub: 'Two models not used in development; at the right, two missions with a disruption.',
+          note: 'All 24 missions: NatureSwarm, whole-network relay, scored ' + num(allOf(NE.held_out)['roost-v3'], 1) + ' and the coordinator ' + num(allOf(NE.held_out).hierarchy, 1) + '. With lying scouts the coordinator scored ' + num(NE.held_out.rows.filter(function (r) { return r.key === 'nest-k7-liars'; })[0].scores.hierarchy, 1) + '.' }
+      ];
+      var ch0 = new Chart(c0.body, neSpec(views0[0].part), { tableHost: c0.table });
+      c0.note.textContent = views0[0].note;
+      segmented(c0.controls, 'View', ['Main study', 'New seeds'], function (i) {
+        var v = views0[i]; ch0.update(neSpec(v.part)); c0.title.textContent = v.title; c0.sub.textContent = v.sub; c0.note.textContent = v.note;
+        c0.setSrc(v.part.figure);
+      });
+    }
+
+    // 02 scaling, one tab per model
+    var c1 = card('chart-scaling', { title: 'Victims rescued against team size', sub: 'Drone search and rescue; open dots, the coordinator’s six episodes at each size.', source: fig('scaling') });
     if (c1) {
       var models = R.scaling.models, start = 2;
       var noteOf = function (m) { return 'Coordinator minus response-threshold drones at 128 drones: ' + signed(m.gap128) + ' points (' + m.note + ').' + (m.model === 'Gemini 4 Argon' ? ' Argon’s coordinator is compared with the drones of the three smaller models; its own NatureSwarm ran from 32 drones.' : ''); };
-      var ch1 = new Chart(c1.body, scalingSpec(models[start]));
+      var ch1 = new Chart(c1.body, scalingSpec(models[start]), { tableHost: c1.table });
       c1.note.textContent = noteOf(models[start]);
       var seg = segmented(c1.controls, 'Language model', models.map(function (m) { return m.model; }), function (i) { ch1.update(scalingSpec(models[i])); c1.note.textContent = noteOf(models[i]); });
       seg.children[0].setAttribute('aria-selected', 'false'); seg.children[start].setAttribute('aria-selected', 'true');
     }
 
-    // 02 prompt length: the padding test and the prompt length by design
-    var c2 = card('chart-prompt', { title: 'Victims rescued against prompt length', sub: 'Mean of the three smaller models', source: 'Fig. 4d of the manuscript' });
+    // 03 prompt length: the padding test and the prompt length by design
+    var c2 = card('chart-prompt', { title: 'Victims rescued against prompt length', sub: 'Mean of the three smaller models.', source: fig('padding') });
     if (c2) {
       var P = R.padding, T = R.tokens;
       var kf = function (v) { return v >= 1000 ? num(v / 1000, v % 1000 ? 1 : 0) + 'k' : num(v); };
@@ -466,48 +530,124 @@
           x: SIZE_AXIS(T.sizes, 6.6, 150), y: { type: 'linear', domain: [0, 15000], ticks: [0, 5000, 10000, 15000], label: 'Prompt tokens per call', tick: kf, fmt: function (v) { return num(v); } },
           series: [
             { id: 'c', name: 'Coordinator', label: 'Coordinator', color: C.coordinator, marker: 'circle', width: 2.6, points: zip(T.sizes, T.coordinator) },
-            { id: 'w', name: 'Team-wide NatureSwarm', label: 'Team-wide NatureSwarm', color: C.swarm, dash: '5 5', marker: 'diamond', open: true, width: 1.8, points: zip(T.sizes, T.teamwide) },
-            { id: 'n', name: 'Neighbour-only NatureSwarm', label: 'Neighbour-only NatureSwarm', color: C.swarm, marker: 'diamond', points: zip(T.sizes, T.natureswarm) },
+            { id: 'w', name: 'NatureSwarm, whole-network relay', label: 'NatureSwarm,\nwhole-network relay', color: C.swarm, dash: '5 5', marker: 'diamond', open: true, width: 1.8, points: zip(T.sizes, T.teamwide) },
+            { id: 'n', name: 'NatureSwarm', label: 'NatureSwarm', color: C.swarm, marker: 'diamond', points: zip(T.sizes, T.natureswarm) },
             { id: 't', name: 'Response-threshold drones', label: 'Response-threshold drones', color: C.threshold, marker: 'triangle', points: zip(T.sizes, T.threshold) }
           ] };
       };
       var views2 = [
-        { spec: padSpec, title: 'Victims rescued against prompt length', src: 'Fig. 4d of the manuscript', note: 'At about 13,800 prompt tokens, the padded eight-drone coordinator rescued ' + num(P.foreign.rescued[3], 1) + '% and the real team of 128 drones ' + num(P.real.rescued[4], 1) + '%.' },
-        { spec: tokSpec, title: 'Prompt tokens per call against team size', src: 'Fig. 2f of the manuscript', note: 'With 128 drones a call of the coordinator held ' + num(T.coordinator[4]) + ' prompt tokens, a call of a neighbour-only NatureSwarm drone ' + num(T.natureswarm[4]) + '.' }
+        { spec: padSpec, title: 'Victims rescued against prompt length', src: fig('padding'), note: 'At about 13,800 prompt tokens, the padded eight-drone coordinator rescued ' + num(P.foreign.rescued[3], 1) + '% and the real team of 128 drones ' + num(P.real.rescued[4], 1) + '%.' },
+        { spec: tokSpec, title: 'Prompt tokens per call against team size', src: fig('tokens'), note: 'With 128 drones a call of the coordinator held ' + num(T.coordinator[4]) + ' prompt tokens and a call of a response-threshold drone ' + num(T.threshold[4]) + '. ' + fig('tokens') + ' shows the coordinator and the response-threshold drones; the NatureSwarm lines are stored values of the same study.' }
       ];
-      var ch2 = new Chart(c2.body, views2[0].spec());
+      var ch2 = new Chart(c2.body, views2[0].spec(), { tableHost: c2.table });
       c2.note.textContent = views2[0].note;
-      segmented(c2.controls, 'View', ['Padding test', 'Prompt length by design'], function (i) {
-        ch2.update(views2[i].spec()); c2.title.textContent = views2[i].title; c2.note.textContent = views2[i].note;
-        c2.host.querySelector('.cc-src').textContent = views2[i].src;
+      segmented(c2.controls, 'View', ['Padding test', 'Prompt length'], function (i) {
+        ch2.update(views2[i].spec()); c2.title.textContent = views2[i].title; c2.note.textContent = views2[i].note; c2.setSrc(views2[i].src);
       });
     }
 
-    // 03 the span-of-control law
-    var c3 = card('chart-law', { title: 'Coordinator advantage against team size', sub: 'Lines: law fitted on 8 to 32 drones, dashed where it predicts', source: 'Fig. 4a,b of the manuscript' });
-    if (c3) {
-      var L = R.law, pick = 5, view = 0;
-      var lawSpec = function () {
-        var series = [], errors = [];
-        L.models.forEach(function (m, k) {
-          var on = k === pick, col = on ? C.coordinator : C.pale, f = function (n) { return m.intercept + m.slope * Math.log2(n); };
-          series.push({ id: 'fit' + k, color: col, width: on ? 2.4 : 1.4, hover: false, table: false, points: [[8, f(8)], [32, f(32)]] });
-          series.push({ id: 'pre' + k, color: col, width: on ? 1.8 : 1.2, dash: '5 5', hover: false, table: false, points: [[32, f(32)], [m.last, f(m.last)]], label: on ? m.model : null });
-          series.push({ id: 'obs' + k, name: m.model, color: on ? C.coordinator : C.grey, opacity: on ? 1 : 0.55, line: false, marker: 'circle', size: on ? 4.6 : 3.4,
-            points: m.points.map(function (p) {
-              var tip = [['observed', signed(p.observed) + ' points']];
-              if (!p.fitted) { tip.push(['predicted by the law', signed(p.predicted) + ' points']); tip.push(['95% prediction interval', signed(p.predicted - p.half) + ' to ' + signed(p.predicted + p.half)]); tip.push(['', p.inside ? 'inside the interval' : 'outside the interval']); if (p.late) tip.push(['', 'run after the law was written']); }
-              else tip.push(['', 'used to fit the law']);
-              return [p.n, p.observed, { open: !p.fitted && !p.inside, ring: on && p.late, title: m.model + ', ' + num(p.n) + ' drones', tip: tip, label: num(p.n) + ' drones' }];
-            }) });
-          if (on) m.points.forEach(function (p) { if (!p.fitted) errors.push({ x: p.n, lo: p.predicted - p.half, hi: p.predicted + p.half, color: C.coordinator, width: 7, opacity: 0.13 }); });
-        });
-        var order = series.filter(function (s) { return s.color === C.pale || s.color === C.grey; }).concat(series.filter(function (s) { return s.color === C.coordinator; }));
-        return { aria: 'Coordinator advantage against team size for seven models with the fitted law', hover: 'point', legend: false, tableSeries: 'Model',
-          x: SIZE_AXIS([8, 16, 32, 64, 128, 256, 512, 1024], 6.6, 1250), y: { type: 'linear', domain: [-70, 20], ticks: [-60, -40, -20, 0, 20], label: 'Coordinator advantage (percentage points)', fmt: function (v) { return signed(v); }, tick: function (v) { return num(v); } },
-          refs: [{ x: 32 }], notes: [{ px: 0.99, py: 0.06, anchor: 'end', text: 'Coordinator ahead' }, { px: 0.99, py: 0.97, anchor: 'end', text: 'Decentralized ahead' }, { x: 32, dx: 8, py: 0.97, text: 'predicted, not fitted', wide: true }],
-          series: order, errors: errors };
+    // 04 128 to 1,024 drones: victims rescued and the list price of an episode
+    var F = R.frontier;
+    var c4 = card('chart-frontier', { title: 'Victims rescued, 128 to 1,024 drones', sub: 'Mean of both worlds; the axis starts at 60%.', source: fig('frontier') });
+    if (c4 && F) {
+      var fs = function (yOf) {
+        var defs = [['coordinator', 'Coordinator, Gemini 4 Argon', C.coordinator, 'circle', 'Coordinator (Argon)'], ['natureswarm', 'NatureSwarm, Gemini 2.5 Flash-Lite', C.swarm, 'diamond', 'NatureSwarm (2.5 Flash-Lite)'],
+          ['threshold', 'Response-threshold drones, Gemini 2.5 Flash-Lite', C.threshold, 'triangle', 'Response-threshold drones (2.5 Flash-Lite)']];
+        return defs.map(function (d) { return { id: d[0], name: d[1], key: d[4], color: d[2], marker: d[3], width: d[0] === 'coordinator' ? 2.6 : 2.25, points: yOf(F[d[0]]) }; });
       };
+      var views4 = [
+        { title: 'Victims rescued, 128 to 1,024 drones', sub: 'Mean of both worlds; the axis starts at 60%.', note: 'Gemini 4 Argon ran the coordinator, Gemini 2.5 Flash-Lite the drones.',
+          spec: function () { return { aria: 'Victims rescued with 128 to 1,024 drones', labels: false, x: SIZE_AXIS(F.sizes, 105, 1250), y: PCT(60, 100, [60, 70, 80, 90, 100]), series: fs(function (d) { return zip(F.sizes, d.rescued); }) }; } },
+        { title: 'List price of an episode', sub: 'US$, mean of both worlds.', note: 'Gemini 4 Argon ran the coordinator, Gemini 2.5 Flash-Lite the drones. The response-threshold drones were priced from 256 drones.',
+          spec: function () { return { aria: 'List price of an episode with 128 to 1,024 drones', labels: false, x: SIZE_AXIS(F.sizes, 105, 1250),
+            y: { type: 'linear', domain: [0, 8], ticks: [0, 2, 4, 6, 8], label: 'US$ per episode', fmt: function (v) { return 'US$' + num(v, 2); } },
+            series: fs(function (d) { return F.sizes.filter(function (n) { return d.price[String(n)] !== undefined; }).map(function (n) { return [n, d.price[String(n)]]; }); }) }; } }
+      ];
+      var ch4 = new Chart(c4.body, views4[0].spec(), { tableHost: c4.table });
+      c4.note.textContent = views4[0].note;
+      segmented(c4.controls, 'View', ['Victims rescued', 'List price'], function (i) { var v = views4[i]; ch4.update(v.spec()); c4.title.textContent = v.title; c4.sub.textContent = v.sub; c4.note.textContent = v.note; });
+    }
+
+    // 05 PandemicEnv: infections averted by number of counties, the registered confirmation
+    var cP = card('chart-pandemic', { title: 'Infections of the variant averted', sub: 'Counties around Dallas, three seeds; against no action on the same seed.', source: fig('pandemic') });
+    if (cP && R.pandemic) {
+      var PD = R.pandemic, pm = 0, pall = 0;
+      var pdSpec = function () {
+        var m = PD.models[pm], sfx = pall ? '_all' : '';
+        return { aria: 'Infections averted against the number of counties, ' + m.model,
+          x: { type: 'log', domain: [12.5, 1330], ticks: PD.sizes, label: 'Counties', fmt: function (v) { return num(v); }, tip: function (v) { return num(v) + ' counties'; } },
+          y: PCT(0, 100, [0, 25, 50, 75, 100], pall ? 'All infections averted (%)' : 'Infections of the variant averted (%)'),
+          series: [
+            { id: 'd', name: 'Detection program, no language model', label: 'Detection program', tipName: 'Detection program', color: C.grey, dash: '5 5', marker: 'down', open: true, width: 1.8, points: zip(PD.sizes, PD['detection' + sfx]) },
+            { id: 'c', name: 'State coordinator', label: 'State coordinator', color: C.coordinator, marker: 'circle', width: 2.6, points: zip(PD.sizes, m['coordinator' + sfx]) },
+            { id: 'n', name: 'NatureSwarm', label: 'NatureSwarm', color: C.swarm, marker: 'diamond', width: 2.6, points: zip(PD.sizes, m['natureswarm' + sfx]) }
+          ] };
+      };
+      var ci = function (t) { return ' (CI ' + num(Math.min(Math.abs(t.lo), Math.abs(t.hi)), 1) + ' to ' + num(Math.max(Math.abs(t.lo), Math.abs(t.hi)), 1) + ')'; };
+      var pdNote = function () {
+        var a = PD.natureswarm_minus_coordinator, b = PD.natureswarm_minus_coordinator_all;
+        return pall ? 'The secondary outcome. On all infections NatureSwarm averted ' + num(Math.abs(b.mean), 1) + ' points ' + (b.mean < 0 ? 'less' : 'more') + ' than the state coordinators' + ci(b) + '.'
+          : 'The primary outcome. Over both models and all sizes NatureSwarm averted ' + num(a.mean, 1) + ' points more than the state coordinators' + ci(a) + '.';
+      };
+      var chP = new Chart(cP.body, pdSpec(), { tableHost: cP.table });
+      var pdRedraw = function () { chP.update(pdSpec()); cP.title.textContent = pall ? 'All infections averted' : 'Infections of the variant averted'; cP.note.textContent = pdNote(); };
+      cP.note.textContent = pdNote();
+      segmented(cP.controls, 'Language model', PD.models.map(function (m) { return m.model; }), function (i) { pm = i; pdRedraw(); });
+      segmented(cP.controls, 'Outcome', ['The variant', 'All infections'], function (i) { pall = i; pdRedraw(); });
+    }
+
+    // 06 slow calls and a silent base
+    var c5 = card('chart-robust', { title: 'Victims rescued in simulated real time', sub: 'Model calls take time; dotted, the span law’s prediction with its 95% interval.', source: fig('realtime') });
+    if (c5) {
+      var RT = R.realtime, SB = R.silent;
+      var rtSpec = function (p) {
+        var s = RT.sizes;
+        return { aria: 'Victims rescued in simulated real time against team size, ' + p.name, x: SIZE_AXIS(s, 12.5, 330), y: PCT(0, 100, [0, 25, 50, 75, 100]),
+          areas: [{ x: s, lo: p.band.lo, hi: p.band.hi, color: C.coordinator, opacity: 0.09, series: 'pred' }],
+          errors: s.map(function (n, i) { return { x: n, lo: p.interval[i][0], hi: p.interval[i][1], color: C.coordinator, series: 'obs' }; })
+            .concat(p.argon_natureswarm.map(function (a) { return { x: a.n, dx: 9, lo: a.iv[0], hi: a.iv[1], color: C.swarm, series: 'own' }; })),
+          series: [
+            { id: 'pred', name: 'Predicted by the span law', key: 'Span law’s prediction', color: C.coordinator, dash: '2 5', width: 1.8, points: zip(s, p.predicted) },
+            { id: 't', name: 'Response-threshold drones, Gemini 2.5 Flash-Lite', key: 'Response-threshold drones (2.5 Flash-Lite)', label: 'Response-threshold drones', tipName: 'Response-threshold drones', color: C.threshold, marker: 'triangle', points: zip(s, p.threshold) },
+            { id: 'n', name: 'NatureSwarm, Gemini 2.5 Flash-Lite', key: 'NatureSwarm (2.5 Flash-Lite)', label: 'NatureSwarm', tipName: 'NatureSwarm, Gemini 2.5 Flash-Lite', color: C.swarm, marker: 'diamond', points: zip(s, p.natureswarm) },
+            { id: 'own', name: 'NatureSwarm, Gemini 4 Argon (32 and 64 drones)', key: 'NatureSwarm (Argon)', tipName: 'NatureSwarm, Gemini 4 Argon', color: C.swarm, line: false, marker: 'diamond', open: true, points: p.argon_natureswarm.map(function (a) { return [a.n, a.y, { dx: 9 }]; }) },
+            { id: 'obs', name: p.name, label: p.name, color: C.coordinator, marker: 'circle', width: 2.6, points: zip(s, p.observed) }
+          ] };
+      };
+      var sbSpec = function () {
+        var st = SB.steps, mk = function (id, name, key, col, extra) { return Object.assign({ id: id, name: name, label: name, color: col, points: zip(st, SB[key]) }, extra || {}); };
+        return { aria: 'Victims rescued by each time step while the base was silent', tableEvery: 5,
+          x: { type: 'linear', domain: [0, 59], ticks: [0, 15, 30, 45, 59], label: 'Time steps', tip: function (v) { return 'Time step ' + v; } }, y: PCT(0, 100, [0, 25, 50, 75, 100]),
+          windows: [{ x0: SB.window[0] - 0.5, x1: SB.window[1] + 0.5, label: 'base silent' }],
+          series: [
+            mk('w', 'Coordinator, working base', 'working', C.coordinator, { dash: '2 5', width: 1.6, label: null }),
+            mk('b', 'Bee', 'bee', C.bee), mk('t', 'Response-threshold drones', 'threshold', C.threshold),
+            mk('c', 'Coordinator', 'coordinator', C.coordinator, { width: 2.6 }), mk('n', 'NatureSwarm, whole-network relay', 'teamwide', C.swarm, { width: 2.6, label: 'NatureSwarm,\nwhole-network relay' })
+          ] };
+      };
+      var views5 = [
+        { spec: function () { return rtSpec(RT.panels[0]); }, title: 'Victims rescued in simulated real time', sub: 'Model calls take time; dotted, the span law’s prediction with its 95% interval.', src: fig('realtime'), note: 'With 256 drones Argon’s coordinator rescued ' + num(RT.panels[0].observed[4], 1) + '%; the law predicted ' + num(RT.panels[0].predicted[4], 1) + '%. Open diamonds at 32 and 64 drones: NatureSwarm run by Argon itself.' },
+        { spec: function () { return rtSpec(RT.panels[1]); }, title: 'Victims rescued in simulated real time', sub: 'Two-level coordinator; dotted, the span law’s prediction with its 95% interval.', src: fig('realtime'), note: 'A two-level coordinator: one coordinator per district reports to a top coordinator. With 256 drones it rescued ' + num(RT.panels[1].observed[4], 1) + '%.' },
+        { spec: sbSpec, title: 'Victims rescued while the base was silent', sub: 'Time steps 15 to 44 without the base; two models, 20 episodes per design.', src: fig('silent'), note: 'After 60 time steps: NatureSwarm, whole-network relay, ' + num(SB.teamwide[59], 1) + '%; coordinator ' + num(SB.coordinator[59], 1) + '%; coordinator with a working base ' + num(SB.working[59], 1) + '%.' }
+      ];
+      var ch5 = new Chart(c5.body, views5[0].spec(), { tableHost: c5.table });
+      c5.note.textContent = views5[0].note;
+      var replay = h('button', 'cc-replay', 'Replay', c5.controls);
+      replay.type = 'button'; replay.hidden = true;
+      replay.addEventListener('click', function () { ch5.replay(2600); });
+      var seg5 = segmented(c5.controls, 'View', ['Real time', 'Real time, two-level', 'Silent base'], function (i) {
+        var v = views5[i];
+        ch5.update(v.spec()); c5.title.textContent = v.title; c5.sub.textContent = v.sub; c5.note.textContent = v.note;
+        c5.setSrc(v.src); replay.hidden = i !== 2;
+        if (i === 2) ch5.replay(2600);
+      });
+      c5.controls.insertBefore(seg5, replay);
+    }
+
+    // 07 the span-of-control law: predicted against observed for the larger teams (the line of each model is in the lab)
+    var c3 = card('chart-law', { title: 'Predicted against observed advantage of the coordinator', sub: '', source: 'Fig. 4f' });
+    if (c3) {
+      var L = R.law, pick = Math.max(0, L.models.map(function (m) { return m.model; }).indexOf('Gemini 3.1 Flash-Lite'));
       var paritySpec = function () {
         var series = [], errors = [];
         L.models.forEach(function (m, k) {
@@ -522,92 +662,129 @@
         });
         series.sort(function (a, b) { return (a.color === C.coordinator) - (b.color === C.coordinator); });
         var ax = function (label) { return { type: 'linear', domain: [-70, 20], ticks: [-60, -40, -20, 0, 20], label: label, fmt: function (v) { return signed(v); }, tick: function (v) { return num(v); } }; };
-        return { aria: 'Predicted against observed coordinator advantage for 17 larger teams', hover: 'point', legend: false, tableSeries: 'Model',
+        return { aria: 'Predicted against observed coordinator advantage for ' + L.predicted_teams + ' larger teams', hover: 'point', legend: false, tableSeries: 'Model',
           x: ax('Predicted advantage (points)'), y: ax('Observed advantage (points)'), refs: [{ diag: [-70, 20] }],
-          notes: [{ px: 0.985, py: 0.95, anchor: 'end', text: L.inside + ' of ' + L.predicted_teams + ' inside the interval' }], series: series, errors: errors };
+          notes: [{ px: 0.03, py: 0.08, text: 'on the line: predicted exactly' }], series: series, errors: errors };
       };
-      var ch3 = new Chart(c3.body, lawSpec());
-      var redraw = function () {
-        ch3.update(view ? paritySpec() : lawSpec());
-        c3.title.textContent = view ? 'Predicted against observed advantage' : 'Coordinator advantage against team size';
-        c3.sub.textContent = view ? L.predicted_teams + ' larger teams; bars, 95% prediction intervals; open markers, outside' : 'Lines: law fitted on 8 to 32 drones, dashed where it predicts';
-      };
-      segmented(c3.controls, 'View', ['Against team size', 'Predicted against observed'], function (i) { view = i; redraw(); });
-      var chips = h('div', 'chips', null, c3.host.insertBefore(document.createElement('div'), c3.body));
-      chips.parentNode.className = 'cc-chips';
-      h('span', 'chips-label', 'Model', chips);
+      c3.sub.textContent = L.predicted_teams + ' larger teams; bars, 95% prediction intervals; open markers lie outside them.';
+      var ch3 = new Chart(c3.body, paritySpec(), { tableHost: c3.table });
+      var chips = h('div', 'chips', null, c3.controls);
+      chips.setAttribute('role', 'group'); chips.setAttribute('aria-label', 'Model');
       var cb = L.models.map(function (m, k) {
         var b = h('button', null, m.model, chips);
         b.type = 'button'; b.setAttribute('aria-pressed', k === pick ? 'true' : 'false');
-        b.addEventListener('click', function () { pick = k; cb.forEach(function (x, j) { x.setAttribute('aria-pressed', j === k ? 'true' : 'false'); }); redraw(); });
+        b.addEventListener('click', function () { pick = k; cb.forEach(function (x, j) { x.setAttribute('aria-pressed', j === k ? 'true' : 'false'); }); ch3.update(paritySpec()); });
         return b;
       });
-      c3.note.textContent = 'Shaded bars and open markers refer to the 95% prediction interval; a ring marks a team run after the law was written.';
+      c3.note.textContent = 'A ring marks a team that was run after the law was written. Argon’s points reach 1,024 drones.';
     }
 
-    // 04 128 to 1,024 drones: rescued and price side by side
-    var F = R.frontier;
-    var c4a = card('chart-frontier-rescued', { title: 'Victims rescued', sub: '128 to 1,024 drones, mean of both worlds; the axis starts at 60%', source: 'Fig. 2g of the manuscript', note: 'Gemini 4 Argon ran the coordinator, Gemini 2.5 Flash-Lite the drones.' });
-    var c4b = card('chart-frontier-price', { title: 'List price of an episode', sub: 'US$, mean of both worlds', source: 'Fig. 2g of the manuscript', note: 'The response-threshold drones were priced from 256 drones.' });
-    var fs = function (key, yOf, labels) {
-      var defs = [['coordinator', 'Coordinator (Gemini 4 Argon)', 'Coordinator,\nGemini 4 Argon', C.coordinator, 'circle'], ['natureswarm', 'Neighbour-only NatureSwarm (Gemini 2.5 Flash-Lite)', 'NatureSwarm,\nGemini 2.5 Flash-Lite', C.swarm, 'diamond'], ['threshold', 'Response-threshold drones (Gemini 2.5 Flash-Lite)', 'Response-threshold\ndrones', C.threshold, 'triangle']];
-      return defs.map(function (d) { return { id: d[0], name: d[1], label: labels ? d[2] : null, color: d[3], marker: d[4], width: d[0] === 'coordinator' ? 2.6 : 2.25, points: yOf(F[d[0]]) }; });
-    };
-    if (c4a) new Chart(c4a.body, { aria: 'Victims rescued with 128 to 1,024 drones', height: 300, x: SIZE_AXIS(F.sizes, 105, 1250), y: PCT(60, 100, [60, 70, 80, 90, 100]),
-      series: fs('rescued', function (d) { return zip(F.sizes, d.rescued); }, false) });
-    if (c4b) new Chart(c4b.body, { aria: 'List price of an episode with 128 to 1,024 drones', height: 300, x: SIZE_AXIS(F.sizes, 105, 1250),
-      y: { type: 'linear', domain: [0, 8], ticks: [0, 2, 4, 6, 8], label: 'US$ per episode', fmt: function (v) { return 'US$' + num(v, 2); } },
-      series: fs('price', function (d) { return F.sizes.filter(function (n) { return d.price[String(n)] !== undefined; }).map(function (n) { return [n, d.price[String(n)]]; }); }, true) });
-
-    // 05 slow calls and a silent base
-    var c5 = card('chart-robust', { title: 'Victims rescued in simulated real time', sub: 'Model calls take time; dotted, the span law’s prediction with its 95% interval', source: 'Fig. 3e of the manuscript' });
-    if (c5) {
-      var RT = R.realtime, SB = R.silent;
-      var rtSpec = function (p) {
-        var s = RT.sizes;
-        return { aria: 'Victims rescued in simulated real time against team size, ' + p.name, x: SIZE_AXIS(s, 12.5, 330), y: PCT(0, 100, [0, 25, 50, 75, 100]),
-          areas: [{ x: s, lo: p.band.lo, hi: p.band.hi, color: C.coordinator, opacity: 0.09, series: 'pred' }],
-          errors: s.map(function (n, i) { return { x: n, lo: p.interval[i][0], hi: p.interval[i][1], color: C.coordinator, series: 'obs' }; })
-            .concat(p.argon_natureswarm.map(function (a) { return { x: a.n, dx: 9, lo: a.iv[0], hi: a.iv[1], color: C.swarm, series: 'own' }; })),
-          series: [
-            { id: 'pred', name: 'Predicted by the span law', color: C.coordinator, dash: '2 5', width: 1.8, points: zip(s, p.predicted) },
-            { id: 't', name: 'Response-threshold drones, Gemini 2.5 Flash-Lite', label: 'Response-threshold drones', tipName: 'Response-threshold drones', color: C.threshold, marker: 'triangle', points: zip(s, p.threshold) },
-            { id: 'n', name: 'Neighbour-only NatureSwarm, Gemini 2.5 Flash-Lite', label: 'Neighbour-only NatureSwarm', tipName: 'Neighbour-only NatureSwarm', color: C.swarm, marker: 'diamond', points: zip(s, p.natureswarm) },
-            { id: 'own', name: 'Neighbour-only NatureSwarm, Gemini 4 Argon (32 and 64 drones)', tipName: 'Neighbour-only NatureSwarm, Gemini 4 Argon', color: C.swarm, line: false, marker: 'diamond', open: true, points: p.argon_natureswarm.map(function (a) { return [a.n, a.y, { dx: 9 }]; }) },
-            { id: 'obs', name: p.name, label: p.name, color: C.coordinator, marker: 'circle', width: 2.6, points: zip(s, p.observed) }
-          ] };
-      };
-      var sbSpec = function () {
-        var st = SB.steps, mk = function (id, name, key, col, extra) { return Object.assign({ id: id, name: name, label: name, color: col, points: zip(st, SB[key]) }, extra || {}); };
-        return { aria: 'Victims rescued by each time step while the base was silent', tableEvery: 5,
-          x: { type: 'linear', domain: [0, 59], ticks: [0, 15, 30, 45, 59], label: 'Time steps', tip: function (v) { return 'Time step ' + v; } }, y: PCT(0, 100, [0, 25, 50, 75, 100]),
-          windows: [{ x0: SB.window[0] - 0.5, x1: SB.window[1] + 0.5, label: 'base silent' }],
-          series: [
-            mk('w', 'Coordinator, working base', 'working', C.coordinator, { dash: '2 5', width: 1.6, label: null }),
-            mk('b', 'Bee', 'bee', C.bee), mk('t', 'Response-threshold drones', 'threshold', C.threshold),
-            mk('c', 'Coordinator', 'coordinator', C.coordinator, { width: 2.6 }), mk('n', 'Team-wide NatureSwarm', 'teamwide', C.swarm, { width: 2.6 })
-          ] };
-      };
-      var views5 = [
-        { spec: function () { return rtSpec(RT.panels[0]); }, title: 'Victims rescued in simulated real time', sub: 'Model calls take time; dotted, the span law’s prediction with its 95% interval', src: 'Fig. 3e of the manuscript', note: 'With 256 drones Argon’s coordinator rescued ' + num(RT.panels[0].observed[4], 1) + '%; the law predicted ' + num(RT.panels[0].predicted[4], 1) + '%. Magenta bars at 32 and 64 drones: Argon’s own neighbour-only NatureSwarm.' },
-        { spec: function () { return rtSpec(RT.panels[1]); }, title: 'Victims rescued in simulated real time', sub: 'Two-level coordinator; dotted, the span law’s prediction with its 95% interval', src: 'Fig. 3e of the manuscript', note: 'With 256 drones Argon’s two-level coordinator rescued ' + num(RT.panels[1].observed[4], 1) + '%.' },
-        { spec: sbSpec, title: 'Victims rescued while the base was silent', sub: 'Time steps 15 to 44 without the base; two models, 20 episodes per design', src: 'Fig. 3b of the manuscript', note: 'After 60 time steps: team-wide NatureSwarm ' + num(SB.teamwide[59], 1) + '%, coordinator ' + num(SB.coordinator[59], 1) + '%, coordinator with a working base ' + num(SB.working[59], 1) + '%.' }
-      ];
-      var ch5 = new Chart(c5.body, views5[0].spec());
-      c5.note.textContent = views5[0].note;
-      var replay = h('button', 'cc-replay', 'Replay', c5.controls);
-      replay.type = 'button'; replay.hidden = true;
-      replay.addEventListener('click', function () { ch5.replay(2600); });
-      var seg5 = segmented(c5.controls, 'View', ['Slow calls: coordinator', 'Slow calls: two-level', 'Silent base'], function (i) {
-        var v = views5[i];
-        ch5.update(v.spec()); c5.title.textContent = v.title; c5.sub.textContent = v.sub; c5.note.textContent = v.note;
-        c5.host.querySelector('.cc-src').textContent = v.src; replay.hidden = i !== 2;
-        if (i === 2) ch5.replay(2600);
+    // 08 evolution: the share of each population that keeps a coordinator, by generation (data/evolution.js)
+    var EV = window.NS_EVOLUTION;
+    var c8 = card('chart-evolution', { title: 'Organizations with a coordinator, by generation', sub: 'Ten organizations per population, one line per population; every population starts with five coordinators.', source: 'Fig. 5c' });
+    if (c8 && EV && EV.lines && EV.lines.length) {
+      var frontier = function (l) { return l.model === 'Gemini 4 Argon'; };
+      var house = function (t) { return String(t).replace(/neighbour-only relay/g, 'neighbour relay').replace(/team-wide relay/g, 'whole-network relay'); };
+      var nSmall = EV.lines.filter(function (l) { return !frontier(l); }).length, nBig = EV.lines.length - nSmall, seen = {};
+      var evSeries = EV.lines.map(function (l, k) {
+        var big = frontier(l), grp = big ? 'f' : 's', first = !seen[grp]; seen[grp] = true;
+        var title = l.model + ', ' + l.setting + ', population ' + (l.line + 1);
+        return { id: 'e' + k, group: grp, name: title, key: big ? nBig + ' populations run by Gemini 4 Argon' : nSmall + ' populations run by smaller models', legend: first,
+          color: big ? C.ink : C.coordinator, opacity: big ? 1 : 0.6, width: big ? 2.8 : 1.9, marker: big ? 'square' : 'circle', size: big ? 4 : 3.2,
+          points: l.share.coordinator.map(function (v, g) { return [g, 100 * v, { title: title, tip: [['generation', String(g)], ['with a coordinator', num(100 * v) + '%'], ['winner', house(l.winner && l.winner.label ? l.winner.label : l.winner)]] }]; }) };
       });
-      c5.controls.insertBefore(seg5, replay);
+      // the frontier model's lines are drawn last, on top
+      evSeries.sort(function (a, b) { return (a.group === 'f') - (b.group === 'f'); });
+      var gens = EV.lines[0].share.coordinator.length;
+      new Chart(c8.body, { aria: 'Share of organizations with a coordinator in each generation, for ' + EV.lines.length + ' evolving populations', hover: 'point', labels: false, tableSeries: 'Population',
+        x: { type: 'linear', domain: [-0.25, gens - 0.75], ticks: EV.lines[0].share.coordinator.map(function (v, g) { return g; }), label: 'Generation', fmt: function (v) { return num(v); } },
+        y: { type: 'linear', domain: [0, 100], ticks: [0, 25, 50, 75, 100], label: 'Organizations with a coordinator (%)', fmt: function (v) { return num(v) + '%'; } },
+        series: evSeries }, { tableHost: c8.table });
+      c8.note.textContent = 'Smaller models: Gemini 2.5 Flash-Lite and Gemini 3.1 Flash-Lite, with 8, 16 or 64 drones. Gemini 4 Argon ran with 16 drones (Supplementary Fig. 25c). Point at a line for its population and winner.';
     }
   }
 
-  function start() { if (window.NS_RESULTS) build(window.NS_RESULTS); }
+  /* ------------------------------------------------------------------- small drawings near the top of the page */
+  // A drawing without text for a tile of the "results at a glance" row: lines over team sizes, or two bars.
+  function spark(host, o) {
+    var W = 240, H = 92, l = 9, r = 231, t = 10, b = 78;
+    host.textContent = '';
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, focusable: 'false' }, host);
+    if (o.bars) {
+      o.bars.forEach(function (bar, i) {
+        el('rect', { x: l, y: 16 + i * 34, width: r - l, height: 24, rx: 7, fill: '#eef3f0' }, svg);
+        el('rect', { x: l, y: 16 + i * 34, width: Math.max(6, (r - l) * bar.v / o.max), height: 24, rx: 7, fill: bar.color }, svg);
+      });
+      return;
+    }
+    el('line', { x1: l, x2: r, y1: H - 6, y2: H - 6, stroke: C.axis, 'stroke-width': 1 }, svg);
+    for (var k = 0; k < o.n; k++) el('line', { x1: l + (r - l) * k / (o.n - 1), x2: l + (r - l) * k / (o.n - 1), y1: H - 6, y2: H - 2, stroke: C.axis, 'stroke-width': 1 }, svg);
+    var sx = function (i) { return l + (r - l) * i / (o.n - 1); }, sy = function (v) { return b - (b - t) * (v - o.lo) / (o.hi - o.lo); };
+    if (o.gap) {      // the area between two lines that cover the same sizes, in the colour of the second
+      var A = o.lines[o.gap[0]].pts, B = o.lines[o.gap[1]].pts;
+      el('path', { d: A.map(function (p, i) { return (i ? 'L' : 'M') + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1); }).join('') +
+        B.slice().reverse().map(function (p) { return 'L' + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1); }).join('') + 'Z', fill: o.lines[o.gap[1]].color, opacity: 0.1 }, svg);
+    }
+    o.lines.forEach(function (s) {
+      var d = s.pts.map(function (p, i) { return (i ? 'L' : 'M') + sx(p[0]).toFixed(1) + ',' + sy(p[1]).toFixed(1); }).join('');
+      el('path', { d: d, fill: 'none', stroke: s.color, 'stroke-width': 3.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, svg);
+      (s.dots ? s.pts : [s.pts[s.pts.length - 1]]).forEach(function (p) { el('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 5, fill: s.color, stroke: '#fff', 'stroke-width': 2.2 }, svg); });
+    });
+  }
+  function glance(R) {
+    var hosts = {};
+    Array.prototype.forEach.call(document.querySelectorAll('.g-viz[data-g]'), function (e) { hosts[e.getAttribute('data-g')] = e; });
+    var idx = function (ys) { return ys.map(function (y, i) { return [i, y]; }); };
+    // victims rescued against team size, mean of the three smaller models (Fig. 3e,f)
+    if (hosts.scale && R.padding && R.scaling) {
+      var small = R.scaling.models.filter(function (m) { return m.model !== 'Gemini 4 Argon'; });
+      spark(hosts.scale, { n: R.padding.sizes.length, lo: 0, hi: 100, gap: [1, 0], lines: [
+        { color: C.threshold, pts: idx(R.padding.sizes.map(function (n, i) { return meanAt(small.map(function (m) { return m.threshold; }), i); })) },
+        { color: C.coordinator, pts: idx(R.padding.real.rescued) }] });
+    }
+    // real time: Argon's coordinator at every size, NatureSwarm run by Argon at the two sizes it ran (Fig. 6d)
+    if (hosts.time && R.realtime) {
+      var p = R.realtime.panels[0], s = R.realtime.sizes;
+      spark(hosts.time, { n: s.length, lo: 0, hi: 100, lines: [
+        { color: C.coordinator, pts: idx(p.observed) },
+        { color: C.swarm, dots: true, pts: p.argon_natureswarm.map(function (a) { return [s.indexOf(a.n), a.y]; }) }] });
+    }
+    // list price of an episode with 1,024 drones (Fig. 2f)
+    if (hosts.cost && R.frontier) {
+      var F = R.frontier, last = String(F.sizes[F.sizes.length - 1]);
+      spark(hosts.cost, { max: F.coordinator.price[last], bars: [{ v: F.natureswarm.price[last], color: C.swarm }, { v: F.coordinator.price[last], color: C.coordinator }] });
+    }
+    // PandemicEnv: the variant's infections averted against the number of counties, mean of both models
+    if (hosts.epidemic && R.pandemic) {
+      var PD = R.pandemic;
+      spark(hosts.epidemic, { n: PD.sizes.length, lo: 0, hi: 100, gap: [0, 1], lines: [
+        { color: C.coordinator, pts: idx(PD.sizes.map(function (n, i) { return meanAt(PD.models.map(function (m) { return m.coordinator; }), i); })) },
+        { color: C.swarm, pts: idx(PD.sizes.map(function (n, i) { return meanAt(PD.models.map(function (m) { return m.natureswarm; }), i); })) }] });
+    }
+  }
+  // The question: what one call has to read as the team grows (prompt tokens per call, Fig. 3d)
+  function loadPic(R) {
+    var host = document.getElementById('loadpic'), T = R.tokens;
+    if (!host || !T) return;
+    host.textContent = '';
+    h('figcaption', null, 'Prompt tokens in one call', host);
+    var max = Math.max.apply(null, T.coordinator), rows = h('div', 'lp-rows', null, host);
+    [8, 32, 128].forEach(function (n) {
+      var k = T.sizes.indexOf(n); if (k < 0) return;
+      var row = h('div', 'lp-row', null, rows);
+      h('span', 'lp-n', num(n) + ' drones', row);
+      var bars = h('div', 'lp-bars', null, row);
+      [['co', T.coordinator[k]], ['rt', T.threshold[k]]].forEach(function (d) {
+        var line = h('div', 'lp-bar ' + d[0], null, bars), bar = h('i', null, null, line);
+        bar.style.width = (76 * d[1] / max).toFixed(1) + '%';
+        h('b', null, num(d[1]), line);
+      });
+    });
+    var key = h('p', 'lp-key', null, host);
+    h('span', 'co', 'coordinator', key); h('span', 'rt', 'one response-threshold drone', key);
+    figChip(T.figure, key);
+  }
+
+  function start() { var R = window.NS_RESULTS; if (!R) return; glance(R); loadPic(R); build(R); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();

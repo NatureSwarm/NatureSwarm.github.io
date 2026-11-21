@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PandemicEnv recordings · NatureSwarm Explorer</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="../viewer.html?env=pandemic">
+<!-- The PandemicEnv viewer (experiments/pandemic/viewer) is part of the Explorer: its player is js/natureswarm-player.js
+     in this folder, its recordings and their list are in traces/. An address of the old page ending in # and a
+     recording's name opens that recording in the Explorer. -->
+<script>
+(function () {
+  var id = decodeURIComponent((location.hash || '').slice(1));
+  location.replace('../viewer.html?env=pandemic' + (id ? '&ep=pandemic-' + encodeURIComponent(id) : ''));
+})();
+</script>
+<noscript><meta http-equiv="refresh" content="0; url=../viewer.html?env=pandemic"></noscript>
+</head>
+<body>
+<p>The PandemicEnv recordings are part of the <a href="../viewer.html?env=pandemic">NatureSwarm Explorer</a>.</p>
+</body>
+</html>

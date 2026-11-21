@@ -1,0 +1,514 @@
+{
+ "note": "written by website/tools/export_pandemic.py from the list of the PandemicEnv viewer (experiments/pandemic/viewer/traces/index.json, scripts/pandemic_viewer.py) and the stored episodes of stage P5; the numbers are read from the traces",
+ "groups": [
+  {
+   "id": "p5",
+   "title": "Confirmation study (P5)",
+   "note": "16 to 256 counties; the second version of NatureSwarm on new seeds.",
+   "method": "Stored episodes of the registered confirmation study (paper_nc/notes/prereg_pandemic_P5.md, stage P5).",
+   "short": "Confirmation (P5)"
+  },
+  {
+   "id": "scale",
+   "title": "Scale (P1)",
+   "note": "16 to 1,024 counties; the registered main study.",
+   "method": "Stored episodes of the registered main study (paper_nc/notes/prereg_pandemic_main.md, stage P1).",
+   "short": "Scale (P1)"
+  },
+  {
+   "id": "mechanism",
+   "title": "The evidence mechanism (P3)",
+   "note": "NatureSwarm's alert mechanism given to the coordinator.",
+   "method": "Stored episodes of the registered mechanism check (paper_nc/notes/prereg_pandemic_P3.md) beside the P1 episodes of the same seed.",
+   "short": "Evidence mechanism (P3)"
+  },
+  {
+   "id": "disruptions",
+   "title": "Disruptions (P2)",
+   "note": "64 counties; the coordinator falls silent or slows down.",
+   "method": "Stored episodes of the registered main study (stage P2) beside the P1 episodes of the same seed.",
+   "short": "Disruptions (P2)"
+  },
+  {
+   "id": "references",
+   "title": "References",
+   "note": "No action and the oracle bound every design.",
+   "method": "Stored rule episodes of the registered main study (stage P1).",
+   "short": "References"
+  }
+ ],
+ "episodes": [
+  {
+   "id": "p5-64",
+   "group": "p5",
+   "name": "64 counties: the state coordinator against NatureSwarm (second version)",
+   "tags": [
+    "64 counties",
+    "Gemini 3.1 Flash-Lite",
+    "seed 301",
+    "confirmation study (P5)"
+   ],
+   "about": "PandemicEnv, the 64 counties nearest Dallas County, Texas: 16 testing teams and an alert budget of 576 county-days over 90 days. The state coordinator and the second version of NatureSwarm (design swarm2), both run by Gemini 3.1 Flash-Lite, beside the detection program, which follows fixed rules and uses no language model. Stored episodes of the registered confirmation study (stage P5), seed 301. Variant infections by day 90 against no action on the same seed: state coordinator 57.2% fewer, NatureSwarm (second version) 76.7% fewer, detection program 79.8% fewer.",
+   "method": "Stored episodes of the registered confirmation study (paper_nc/notes/prereg_pandemic_P5.md, stage P5), written as traces by the exporter of the PandemicEnv viewer (scripts/pandemic_viewer.py); no model is called. Seed 301: the seed whose reductions lie closest to each design's mean over the candidate seeds (300 to 302).",
+   "traces": [
+    "traces/p5_3.1-flash-lite_64_coordinator_s301.json",
+    "traces/p5_3.1-flash-lite_64_swarm2_s301.json",
+    "traces/p5_rule_64_detect_s301.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm (second version)",
+     "Detection program"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b",
+     "#2a9d5c"
+    ],
+    "subs": [
+     "Gemini 3.1 Flash-Lite",
+     "Gemini 3.1 Flash-Lite",
+     "no language model"
+    ]
+   },
+   "task": "p5",
+   "study": "confirmation study (P5)",
+   "order": 101,
+   "featured": true,
+   "takeaway": "The state coordinator, the second version of NatureSwarm and a detection program on the same region and seed. Variant infections by day 90 against no action, left to right: 57.2% fewer, 76.7% fewer, 79.8% fewer.",
+   "poster": "media/explorer/pandemic-p5-64.jpg"
+  },
+  {
+   "id": "p5-16",
+   "group": "p5",
+   "name": "16 counties: the state coordinator against NatureSwarm (second version)",
+   "tags": [
+    "16 counties",
+    "Gemini 3.1 Flash-Lite",
+    "seed 301",
+    "confirmation study (P5)"
+   ],
+   "about": "PandemicEnv, the 16 counties nearest Dallas County, Texas: 4 testing teams and an alert budget of 144 county-days over 90 days. The state coordinator and the second version of NatureSwarm (design swarm2), both run by Gemini 3.1 Flash-Lite, beside the detection program, which follows fixed rules and uses no language model. Stored episodes of the registered confirmation study (stage P5), seed 301. Variant infections by day 90 against no action on the same seed: state coordinator 1.7% more, NatureSwarm (second version) 54.8% fewer, detection program 25.4% fewer.",
+   "method": "Stored episodes of the registered confirmation study (paper_nc/notes/prereg_pandemic_P5.md, stage P5), written as traces by the exporter of the PandemicEnv viewer (scripts/pandemic_viewer.py); no model is called. Seed 301: the seed whose reductions lie closest to each design's mean over the candidate seeds (300 to 302).",
+   "traces": [
+    "traces/p5_3.1-flash-lite_16_coordinator_s301.json",
+    "traces/p5_3.1-flash-lite_16_swarm2_s301.json",
+    "traces/p5_rule_16_detect_s301.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm (second version)",
+     "Detection program"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b",
+     "#2a9d5c"
+    ],
+    "subs": [
+     "Gemini 3.1 Flash-Lite",
+     "Gemini 3.1 Flash-Lite",
+     "no language model"
+    ]
+   },
+   "task": "p5",
+   "study": "confirmation study (P5)",
+   "order": 102,
+   "featured": false,
+   "takeaway": "The state coordinator, the second version of NatureSwarm and a detection program on the same region and seed. Variant infections by day 90 against no action, left to right: 1.7% more, 54.8% fewer, 25.4% fewer.",
+   "poster": "media/explorer/pandemic-p5-16.jpg"
+  },
+  {
+   "id": "p5-256",
+   "group": "p5",
+   "name": "256 counties: the state coordinator against NatureSwarm (second version)",
+   "tags": [
+    "256 counties",
+    "Gemini 3.1 Flash-Lite",
+    "seed 300",
+    "confirmation study (P5)"
+   ],
+   "about": "PandemicEnv, the 256 counties nearest Dallas County, Texas: 64 testing teams and an alert budget of 2,304 county-days over 90 days. The state coordinator and the second version of NatureSwarm (design swarm2), both run by Gemini 3.1 Flash-Lite, beside the detection program, which follows fixed rules and uses no language model. Stored episodes of the registered confirmation study (stage P5), seed 300. Variant infections by day 90 against no action on the same seed: state coordinator 38.3% fewer, NatureSwarm (second version) 88.9% fewer, detection program 83.1% fewer.",
+   "method": "Stored episodes of the registered confirmation study (paper_nc/notes/prereg_pandemic_P5.md, stage P5), written as traces by the exporter of the PandemicEnv viewer (scripts/pandemic_viewer.py); no model is called. Seed 300: the seed whose reductions lie closest to each design's mean over the candidate seeds (300 to 302).",
+   "traces": [
+    "traces/p5_3.1-flash-lite_256_coordinator_s300.json",
+    "traces/p5_3.1-flash-lite_256_swarm2_s300.json",
+    "traces/p5_rule_256_detect_s300.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm (second version)",
+     "Detection program"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b",
+     "#2a9d5c"
+    ],
+    "subs": [
+     "Gemini 3.1 Flash-Lite",
+     "Gemini 3.1 Flash-Lite",
+     "no language model"
+    ]
+   },
+   "task": "p5",
+   "study": "confirmation study (P5)",
+   "order": 103,
+   "featured": false,
+   "takeaway": "The state coordinator, the second version of NatureSwarm and a detection program on the same region and seed. Variant infections by day 90 against no action, left to right: 38.3% fewer, 88.9% fewer, 83.1% fewer.",
+   "poster": "media/explorer/pandemic-p5-256.jpg"
+  },
+  {
+   "id": "scale-64",
+   "group": "scale",
+   "name": "64 counties: the state coordinator, NatureSwarm and a detection program",
+   "tags": [
+    "64 counties",
+    "Gemini 3.1 Flash-Lite",
+    "seed 202",
+    "main study (P1)"
+   ],
+   "about": "A faster variant enters through the airport counties around Dallas and Fort Worth. Each design moves 16 testing teams along commuting links and spends a shared budget of 576 alert-days. The state coordinator decides for every county at once; NatureSwarm's counties decide for themselves and act only on first-hand evidence; the detection program follows fixed rules and uses no language model.",
+   "method": "Stored episodes of the registered main study (paper_nc/notes/prereg_pandemic_main.md, stage P1). Seed 202: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p1_3.1-flash-lite_64_coordinator_s202.json",
+    "traces/p1_3.1-flash-lite_64_swarm_s202.json",
+    "traces/p1_rule_64_detect_s202.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm",
+     "Detection program"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b",
+     "#2a9d5c"
+    ],
+    "subs": [
+     "Gemini 3.1 Flash-Lite",
+     "Gemini 3.1 Flash-Lite",
+     "no language model"
+    ]
+   },
+   "task": "scale",
+   "study": "main study (P1)",
+   "order": 201,
+   "featured": false,
+   "takeaway": "The state coordinator decides for every county at once; NatureSwarm's counties decide for themselves and act only on first-hand evidence. Variant infections by day 90 against no action, left to right: 8.2% more, 57.0% fewer, 56.5% fewer.",
+   "poster": "media/explorer/pandemic-scale-64.jpg"
+  },
+  {
+   "id": "scale-256",
+   "group": "scale",
+   "name": "256 counties: the same three designs on a four times larger region",
+   "tags": [
+    "256 counties",
+    "Gemini 2.5 Flash-Lite",
+    "seed 201",
+    "main study (P1)"
+   ],
+   "about": "The region now reaches into Oklahoma, with 64 testing teams and 2,304 alert-days. The coordinator still writes one order sheet for all 256 counties each day.",
+   "method": "Stored episodes of the registered main study (paper_nc/notes/prereg_pandemic_main.md, stage P1). Seed 201: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p1_2.5-flash-lite_256_coordinator_s201.json",
+    "traces/p1_2.5-flash-lite_256_swarm_s201.json",
+    "traces/p1_rule_256_detect_s201.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm",
+     "Detection program"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b",
+     "#2a9d5c"
+    ],
+    "subs": [
+     "Gemini 2.5 Flash-Lite",
+     "Gemini 2.5 Flash-Lite",
+     "no language model"
+    ]
+   },
+   "task": "scale",
+   "study": "main study (P1)",
+   "order": 202,
+   "featured": false,
+   "takeaway": "The coordinator still writes one order sheet for all 256 counties each day. Variant infections by day 90 against no action, left to right: 58.5% fewer, 60.5% fewer, 73.3% fewer.",
+   "poster": "media/explorer/pandemic-scale-256.jpg"
+  },
+  {
+   "id": "scale-1024",
+   "group": "scale",
+   "name": "1,024 counties: the state coordinator against NatureSwarm at the largest scale",
+   "tags": [
+    "1,024 counties",
+    "Gemini 2.5 Flash-Lite",
+    "seed 201",
+    "main study (P1)"
+   ],
+   "about": "1,024 counties across Texas, Oklahoma and neighbouring states, 256 testing teams and 9,216 alert-days. At this scale NatureSwarm's counties keep acting on local evidence while the coordinator's daily order sheet covers a thousand counties.",
+   "method": "Stored episodes of the registered main study (paper_nc/notes/prereg_pandemic_main.md, stage P1). Seed 201: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p1_2.5-flash-lite_1024_coordinator_s201.json",
+    "traces/p1_2.5-flash-lite_1024_swarm_s201.json",
+    "traces/p1_rule_1024_detect_s201.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm",
+     "Detection program"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b",
+     "#2a9d5c"
+    ],
+    "subs": [
+     "Gemini 2.5 Flash-Lite",
+     "Gemini 2.5 Flash-Lite",
+     "no language model"
+    ]
+   },
+   "task": "scale",
+   "study": "main study (P1)",
+   "order": 203,
+   "featured": false,
+   "takeaway": "NatureSwarm's counties keep acting on local evidence while the coordinator's daily order sheet covers a thousand counties. Variant infections by day 90 against no action, left to right: 39.9% fewer, 61.8% fewer, 73.7% fewer.",
+   "poster": "media/explorer/pandemic-scale-1024.jpg"
+  },
+  {
+   "id": "scale-16",
+   "group": "scale",
+   "name": "16 counties: a small region, where one coordinator can see everything",
+   "tags": [
+    "16 counties",
+    "Gemini 2.5 Flash-Lite",
+    "seed 201",
+    "main study (P1)"
+   ],
+   "about": "The smallest region of the study: Dallas, Fort Worth and their neighbours, 4 testing teams and 144 alert-days.",
+   "method": "Stored episodes of the registered main study (paper_nc/notes/prereg_pandemic_main.md, stage P1). Seed 201: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p1_2.5-flash-lite_16_coordinator_s201.json",
+    "traces/p1_2.5-flash-lite_16_swarm_s201.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b"
+    ],
+    "subs": [
+     "Gemini 2.5 Flash-Lite",
+     "Gemini 2.5 Flash-Lite"
+    ]
+   },
+   "task": "scale",
+   "study": "main study (P1)",
+   "order": 204,
+   "featured": false,
+   "takeaway": "The smallest region of the study: Dallas, Fort Worth and their neighbours, with 4 testing teams. Variant infections by day 90 against no action, left to right: 30.0% fewer, 34.4% fewer.",
+   "poster": "media/explorer/pandemic-scale-16.jpg"
+  },
+  {
+   "id": "rule-64",
+   "group": "mechanism",
+   "name": "64 counties: NatureSwarm's evidence mechanism given to the coordinator",
+   "tags": [
+    "64 counties",
+    "Gemini 3.1 Flash-Lite",
+    "seed 202",
+    "mechanism check (P3)"
+   ],
+   "about": "The middle panel is the same state coordinator with one change: its alerts take effect only where a county's own teams or sequencing found the variant, or where two of its commuting partners did, as honeybee scouts recruit only to sites they have inspected. This mechanism, more than deciding county by county, explains most of NatureSwarm's advantage up to 64 counties.",
+   "method": "Stored episodes of the registered mechanism check (paper_nc/notes/prereg_pandemic_P3.md) beside the P1 episodes of the same seed. Seed 202: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p1_3.1-flash-lite_64_coordinator_s202.json",
+    "traces/p3_3.1-flash-lite_64_coordinator_gate_s202.json",
+    "traces/p1_3.1-flash-lite_64_swarm_s202.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "Coordinator, evidence mechanism",
+     "NatureSwarm"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#3f2d86",
+     "#c2185b"
+    ],
+    "subs": [
+     "Gemini 3.1 Flash-Lite",
+     "Gemini 3.1 Flash-Lite",
+     "Gemini 3.1 Flash-Lite"
+    ]
+   },
+   "task": "mechanism",
+   "study": "mechanism check (P3)",
+   "order": 301,
+   "featured": false,
+   "takeaway": "Middle panel: the same state coordinator, whose alerts take effect only where a county's own teams or sequencing found the variant, or where two of its commuting partners did. Variant infections by day 90 against no action, left to right: 8.2% more, 61.5% fewer, 57.0% fewer.",
+   "poster": "media/explorer/pandemic-rule-64.jpg"
+  },
+  {
+   "id": "rule-1024",
+   "group": "mechanism",
+   "name": "1,024 counties: the evidence mechanism with and without decentralization",
+   "tags": [
+    "1,024 counties",
+    "Gemini 2.5 Flash-Lite",
+    "seed 201",
+    "mechanism check (P3)"
+   ],
+   "about": "Both designs follow the same evidence mechanism. At 1,024 counties, NatureSwarm's counties decide locally while the coordinator must still write every order.",
+   "method": "Stored episodes of the registered mechanism check (paper_nc/notes/prereg_pandemic_P3.md) beside the P1 episodes of the same seed. Seed 201: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p3_2.5-flash-lite_1024_coordinator_gate_s201.json",
+    "traces/p1_2.5-flash-lite_1024_swarm_s201.json"
+   ],
+   "opts": {
+    "titles": [
+     "Coordinator with NatureSwarm's evidence mechanism",
+     "NatureSwarm"
+    ],
+    "colors": [
+     "#3f2d86",
+     "#c2185b"
+    ],
+    "subs": [
+     "Gemini 2.5 Flash-Lite",
+     "Gemini 2.5 Flash-Lite"
+    ]
+   },
+   "task": "mechanism",
+   "study": "mechanism check (P3)",
+   "order": 302,
+   "featured": false,
+   "takeaway": "Both designs follow the same evidence mechanism; NatureSwarm's counties decide locally while the coordinator must still write every order. Variant infections by day 90 against no action, left to right: 52.6% fewer, 61.8% fewer.",
+   "poster": "media/explorer/pandemic-rule-1024.jpg"
+  },
+  {
+   "id": "silent-64",
+   "group": "disruptions",
+   "name": "The state goes silent for 14 days (64 counties)",
+   "tags": [
+    "64 counties",
+    "Gemini 2.5 Flash-Lite",
+    "seed 202",
+    "main study (P2)"
+   ],
+   "about": "From day 20 to day 33 the state coordinator gives no orders; counties keep their teams and alerts. NatureSwarm has no centre to lose.",
+   "method": "Stored episodes of the registered main study (stage P2) beside the P1 episodes of the same seed. Seed 202: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p2-silent_2.5-flash-lite_64_coordinator_s202.json",
+    "traces/p2-silent_2.5-flash-lite_64_swarm_s202.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "NatureSwarm"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#c2185b"
+    ],
+    "subs": [
+     "Gemini 2.5 Flash-Lite · state silent on days 20 to 33",
+     "Gemini 2.5 Flash-Lite · state silent on days 20 to 33"
+    ]
+   },
+   "task": "disruptions",
+   "study": "main study (P2)",
+   "order": 401,
+   "featured": false,
+   "takeaway": "From day 20 to day 33 the state coordinator gives no orders; counties keep their teams and alerts. Variant infections by day 90 against no action, left to right: 38.3% fewer, 47.4% fewer.",
+   "poster": "media/explorer/pandemic-silent-64.jpg"
+  },
+  {
+   "id": "weekly-64",
+   "group": "disruptions",
+   "name": "A coordinator that decides once a week against one that decides daily",
+   "tags": [
+    "64 counties",
+    "Gemini 3.1 Flash-Lite",
+    "seed 202",
+    "main study (P2)"
+   ],
+   "about": "The same coordinator and model, deciding every day (left) or only on days 0, 7, 14 and so on (right). Deciding less often, it spends less of its alert budget before the variant is found, and its teams spend fewer days on the road.",
+   "method": "Stored episodes of the registered main study (stage P2) beside the P1 episodes of the same seed. Seed 202: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p1_3.1-flash-lite_64_coordinator_s202.json",
+    "traces/p2-weekly_3.1-flash-lite_64_coordinator_s202.json"
+   ],
+   "opts": {
+    "titles": [
+     "State coordinator",
+     "State coordinator (weekly)"
+    ],
+    "colors": [
+     "#6b4fb5",
+     "#6b4fb5"
+    ],
+    "subs": [
+     "Gemini 3.1 Flash-Lite",
+     "Gemini 3.1 Flash-Lite · coordinator decides once a week"
+    ]
+   },
+   "task": "disruptions",
+   "study": "main study (P2)",
+   "order": 402,
+   "featured": false,
+   "takeaway": "The same coordinator and model, deciding every day (left) or only on days 0, 7, 14 and so on (right). Variant infections by day 90 against no action, left to right: 8.2% more, 54.0% fewer.",
+   "poster": "media/explorer/pandemic-weekly-64.jpg"
+  },
+  {
+   "id": "none-64",
+   "group": "references",
+   "name": "No action: the variant spreads unchecked (64 counties)",
+   "tags": [
+    "64 counties",
+    "no language model",
+    "seed 205",
+    "main study (P1)"
+   ],
+   "about": "Left: teams test where they start and no alert is raised. Right: the oracle, which sees true infections and keeps its alerts on the counties with the most variant infections, paced over the 90 days. Every other design lies between the two.",
+   "method": "Stored rule episodes of the registered main study (stage P1). Seed 205: the seed whose reductions lie closest to each design's mean over the candidate seeds.",
+   "traces": [
+    "traces/p1_rule_64_none_s205.json",
+    "traces/p1_rule_64_oracle_s205.json"
+   ],
+   "opts": {
+    "titles": [
+     "No action",
+     "Oracle"
+    ],
+    "colors": [
+     "#6f6e69",
+     "#222222"
+    ],
+    "subs": [
+     "no language model",
+     "no language model"
+    ]
+   },
+   "task": "references",
+   "study": "main study (P1)",
+   "order": 501,
+   "featured": false,
+   "takeaway": "Left: teams test where they start and no alert is raised. Right: the oracle, which sees true infections. Every other design lies between the two. Variant infections by day 90 against no action: 90.9% fewer with the oracle.",
+   "poster": "media/explorer/pandemic-none-64.jpg"
+  }
+ ]
+}

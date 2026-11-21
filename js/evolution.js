@@ -1,5 +1,5 @@
 /* NatureSwarm project page: the evolution demos. Two views of stored runs (data/evolution.js, written by
-   scripts/viz/export_evolution.py): (1) a population of ten team designs over five generations, with who was kept
+   scripts/viz/export_evolution.py): (1) a population of ten organizations over five generations, with who was kept
    and whose mutant each newcomer is; (2) eight teams of eight drones under four kinds of selection, with the drones
    that carry a cooperative gene. Nothing is simulated in the browser. Author: Kunlun Zhu. */
 (function () {
@@ -9,16 +9,23 @@
   var NS = 'http://www.w3.org/2000/svg';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // The stored labels use earlier names for the two relay settings of NatureSwarm; every text is shown with the
+  // paper's current names: relay between neighbours, and relay through the whole radio network.
+  function house(t) {
+    return String(t).replace(/neighbour-only \(radio range\)/g, 'between neighbours (radio range)').replace(/team-wide \(whole radio network\)/g, 'through the whole radio network')
+      .replace(/neighbour-only relay/g, 'neighbour relay').replace(/team-wide relay/g, 'whole-network relay')
+      .replace(/neighbour-only/g, 'neighbour relay').replace(/team-wide/g, 'whole-network relay');
+  }
   function el(tag, attrs, text) {
     var e = document.createElement(tag);
     for (var k in attrs || {}) { if (k === 'class') e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
-    if (text != null) e.textContent = text;
+    if (text != null) e.textContent = house(text);
     return e;
   }
   function sv(tag, attrs, text) {
     var e = document.createElementNS(NS, tag);
     for (var k in attrs || {}) e.setAttribute(k, attrs[k]);
-    if (text != null) e.textContent = text;
+    if (text != null) e.textContent = house(text);
     return e;
   }
   function pct(v) { return Math.round(100 * v) + '%'; }
@@ -33,11 +40,11 @@
     });
   }
 
-  /* ------------------------------------------------------------------ 1. a population of team designs */
+  /* ------------------------------------------------------------------ 1. a population of organizations */
   var COLOR = { coordinator: '#1f5fae', 'two-level': '#7aa3d8', 'ns-neighbour': '#b5367a', 'ns-team': '#dc8fb8',
                 threshold: '#1c9e6b', bee: '#b9770a', wolf: '#66797a', solitary: '#b3c0bb' };
-  var KEYNAME = [['coordinator', 'Coordinator'], ['two-level', 'Two-level coordinator'], ['ns-neighbour', 'NatureSwarm, neighbour-only relay'],
-                 ['ns-team', 'NatureSwarm, team-wide relay'], ['threshold', 'Response-threshold drones'], ['bee', 'Bee design'],
+  var KEYNAME = [['coordinator', 'Coordinator'], ['two-level', 'Two-level coordinator'], ['ns-neighbour', 'NatureSwarm, neighbour relay'],
+                 ['ns-team', 'NatureSwarm, whole-network relay'], ['threshold', 'Response-threshold drones'], ['bee', 'Bee design'],
                  ['wolf', 'Wolf-pack pairs'], ['solitary', 'Solitary drones']];
   function colourKey(p) { return p.family === 'mosaic' ? p.kind : p.family; }
   function chipText(p) {
@@ -51,7 +58,7 @@
       var t = [g.thr_local ? 'local' : null, g.thr_areas ? 'per area' : null, g.thr_adaptive ? 'adaptive' : null].filter(Boolean);
       return ['Response threshold', t.length ? t.join(', ') : 'plain'];
     }
-    return ['NatureSwarm', (g.mos_relay === 'contact' ? 'neighbour-only' : 'team-wide') + (g.mos_fade ? ', fade ' + g.mos_fade : '')];
+    return ['NatureSwarm', (g.mos_relay === 'contact' ? 'neighbour relay' : 'whole-network relay') + (g.mos_fade ? ', fade ' + g.mos_fade : '')];
   }
   var GENE = {}; D.genes.forEach(function (g) { GENE[g.key] = g; });
   function geneValue(k, v) {
@@ -66,7 +73,7 @@
     var settings = [];
     D.lines.forEach(function (L) { if (settings.indexOf(L.regime) < 0) settings.push(L.regime); });
     var state = { regime: 'R1', id: null, pinned: null, upto: 4, timer: null };
-    var W = 1060, COLW = 208, CW = 180, RH = 42, TOP = 46, CH = 34;
+    var W = 1060, COLW = 208, CW = 180, RH = 36, TOP = 46, CH = 28;
 
     function lines() { return D.lines.filter(function (L) { return L.regime === state.regime; }); }
     function line() { return D.lines.filter(function (L) { return L.id === state.id; })[0]; }
@@ -123,9 +130,9 @@
         var expressed = o.changed.filter(function (k) { return p.expressed.indexOf(k) >= 0 || par.expressed.indexOf(k) >= 0; });
         var parts = expressed.map(function (k) { return GENE[k].name.toLowerCase() + ': ' + geneValue(k, par.genes[k]) + ' → ' + geneValue(k, p.genes[k]); });
         var silent = o.changed.length - expressed.length;
-        how.textContent = 'A mutant of rank ' + (o.parent_rank + 1) + ' in generation ' + (g - 1) + ' (' + par.label + '). ' +
+        how.textContent = house('A mutant of rank ' + (o.parent_rank + 1) + ' in generation ' + (g - 1) + ' (' + par.label + '). ' +
           (parts.length ? 'Changed: ' + parts.join('; ') + '. ' : 'No gene that this design uses changed. ') +
-          (silent ? silent + ' gene' + (silent > 1 ? 's' : '') + ' it does not use also changed.' : '');
+          (silent ? silent + ' gene' + (silent > 1 ? 's' : '') + ' it does not use also changed.' : ''));
       }
       detail.appendChild(how);
       var list = el('ul', { class: 'evo-genes' });
@@ -140,13 +147,13 @@
       var L = line(), G = L.generations;
       stage.innerHTML = '';
       var H = TOP + 10 * RH + 8;
-      var svg = sv('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Ten team designs in each of five generations, ranked by victims rescued, with lines from each design to its copy or mutant in the next generation' });
+      var svg = sv('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Ten organizations in each of five generations, ranked by victims rescued, with lines from each to its copy or mutated copy in the next generation' });
       var hl = state.pinned ? lineage(L, state.pinned[0], state.pinned[1]) : null;
       var gl = sv('g', { class: 'evo-links' }), gc = sv('g');
       G.forEach(function (gen, g) {
         if (g > state.upto) return;
         gc.appendChild(sv('text', { x: x0(g), y: 20, class: 'evo-gen' }, 'Generation ' + g));
-        gc.appendChild(sv('text', { x: x0(g) + CW, y: 20, class: 'evo-gen-r', 'text-anchor': 'end' }, 'rescued'));
+        if (g === 0) gc.appendChild(sv('text', { x: x0(g) + CW, y: 20, class: 'evo-gen-r', 'text-anchor': 'end' }, 'victims rescued'));
         gen.pop.forEach(function (p) {
           var x = x0(g), y = y0(p.rank), on = !hl || hl[g + ':' + p.rank];
           if (g > 0 && p.origin.kind !== 'start') {
@@ -165,10 +172,10 @@
           chip.appendChild(sv('rect', { width: CW, height: CH, rx: 8, fill: '#fff', stroke: state.pinned && state.pinned[0] === g && state.pinned[1] === p.rank ? '#15302b' : '#d5e0db',
             'stroke-width': state.pinned && state.pinned[0] === g && state.pinned[1] === p.rank ? 2 : 1 }));
           chip.appendChild(sv('rect', { x: 0, y: CH - 3, width: Math.max(2, CW * p.fitness), height: 3, rx: 1.5, fill: COLOR[colourKey(p)], opacity: 0.55 }));
-          chip.appendChild(sv('rect', { x: 8, y: 9, width: 10, height: 10, rx: 3, fill: COLOR[colourKey(p)] }));
-          chip.appendChild(sv('text', { x: 25, y: 15, class: 'evo-name' }, t[0]));
-          chip.appendChild(sv('text', { x: 25, y: 27, class: 'evo-tag' }, t[1]));
-          chip.appendChild(sv('text', { x: CW - 8, y: 19, class: 'evo-fit', 'text-anchor': 'end' }, pct(p.fitness)));
+          chip.appendChild(sv('title', null, t[0] + ', ' + t[1]));
+          chip.appendChild(sv('rect', { x: 8, y: 8, width: 10, height: 10, rx: 3, fill: COLOR[colourKey(p)] }));
+          chip.appendChild(sv('text', { x: 25, y: 17.5, class: 'evo-name' }, t[0]));
+          chip.appendChild(sv('text', { x: CW - 8, y: 17.5, class: 'evo-fit', 'text-anchor': 'end' }, pct(p.fitness)));
           if (g === G.length - 1 && p.rank === 0) chip.appendChild(sv('text', { x: CW - 8, y: -5, class: 'evo-win', 'text-anchor': 'end' }, 'winner'));
           function pick() { state.pinned = (state.pinned && state.pinned[0] === g && state.pinned[1] === p.rank) ? null : [g, p.rank]; draw(); if (state.pinned) describe(L, g, p.rank); else rest(); }
           chip.addEventListener('click', pick);
@@ -188,7 +195,7 @@
     function rest() {
       var L = line();
       detail.innerHTML = '';
-      detail.appendChild(el('p', { class: 'evo-d-how' }, 'Point at a design to see its genes and where it came from; select it to follow its line of descent. Solid lines: kept unchanged from the best half. Dashed lines: a mutant of the design it starts from.' +
+      detail.appendChild(el('p', { class: 'evo-d-how' }, 'Select a design to see its genes and its line of descent. Solid lines: kept unchanged. Dashed lines: a mutant.' +
         (L.parents ? '' : ' For this population the parents of mutants are not shown.')));
     }
 
@@ -214,10 +221,14 @@
       txt.appendChild(el('p', null, 'Designs with a coordinator: ' + pct(L.share.coordinator[0]) + ' of the population at the start, ' + pct(L.share.coordinator[last]) + ' in generation ' + last + '. Winner: ' + L.winner.label + '.'));
       var h = D.heldout.filter(function (o) { return o.regime === L.regime && o.model === L.model; })[0];
       txt.appendChild(el('p', { class: 'evo-held' }, h
-        ? 'On new worlds, the winners of this setting rescued ' + h.gain.toFixed(1) + ' percentage points more than the coordinator (95% CI ' + String(h.lo.toFixed(1)).replace('-', '\u2212') + ' to ' + h.hi.toFixed(1) + ')' +
+        ? 'On new worlds the winners rescued ' + h.gain.toFixed(1) + ' points more than the coordinator (95% CI ' + String(h.lo.toFixed(1)).replace('-', '\u2212') + ' to ' + h.hi.toFixed(1) + ')' +
           (h.lo < 0 ? ', a lead not clearly different from zero.' : '.')
         : (L.model === 'Gemini 4 Argon' ? 'Both populations run by the frontier model kept the coordinator.' : 'The same setting run by the frontier model kept the coordinator; choose a Gemini 4 Argon population to see it.')));
-      txt.appendChild(el('p', { class: 'evo-note' }, L.note + ' Each design ran on ' + L.generations[0].seeds.length + ' training world' + (L.generations[0].seeds.length > 1 ? 's' : '') + ' per generation, drawn anew each time.'));
+      // the note on this population's world and training goes into the section's "Details" where the page has one
+      var note = L.note + ' Each design ran on ' + L.generations[0].seeds.length + ' training world' + (L.generations[0].seeds.length > 1 ? 's' : '') + ' per generation, drawn anew each time.';
+      var noteHost = document.getElementById('evo-note');
+      if (noteHost) noteHost.textContent = house('The population shown: ' + L.model + ', ' + L.setting + '. ' + note);
+      else txt.appendChild(el('p', { class: 'evo-note' }, note));
       summary.appendChild(txt);
     }
 

@@ -1,125 +1,145 @@
 1
-00:00:00,600 --> 00:00:02,864
+00:00:00,600 --> 00:00:03,003
 Language models now work in teams.
 
 2
-00:00:03,214 --> 00:00:06,790
+00:00:03,353 --> 00:00:06,836
 How should a team of hundreds, or a thousand, be organized?
 
 3
-00:00:08,200 --> 00:00:14,353
+00:00:08,267 --> 00:00:14,629
 Most multi-agent systems rely on a coordinator:
 one agent that reads every report and gives every order.
 
 4
-00:00:14,703 --> 00:00:20,880
+00:00:14,979 --> 00:00:21,213
 Honeybee swarms, ant colonies and bird flocks coordinate
 through local interactions, with no one directing the whole.
 
 5
-00:00:21,230 --> 00:00:25,665
+00:00:21,563 --> 00:00:26,103
 Do their mechanisms still help language-model
 agents when a coordinator is available?
 
 6
-00:00:27,067 --> 00:00:30,108
+00:00:27,533 --> 00:00:30,622
 A honeybee swarm chooses its new home without a leader.
 
 7
-00:00:30,458 --> 00:00:35,602
+00:00:30,972 --> 00:00:35,778
 Scouts inspect cavities themselves,
 and the swarm commits once enough of them gather at one.
 
 8
-00:00:37,033 --> 00:00:39,692
+00:00:37,200 --> 00:00:39,963
 Ants mark the paths they walk, and the marks fade.
 
 9
-00:00:40,042 --> 00:00:43,885
+00:00:40,313 --> 00:00:43,947
 A shorter path is renewed faster, so the colony settles on it.
 
 10
-00:00:45,300 --> 00:00:48,272
+00:00:45,367 --> 00:00:48,316
 In a flock, each bird follows only its nearest neighbours.
 
 11
-00:00:48,622 --> 00:00:51,954
+00:00:48,666 --> 00:00:51,870
 A few birds that know the way can
 guide the rest past the hawks.
 
 12
-00:00:53,367 --> 00:01:00,983
+00:00:53,300 --> 00:01:01,450
 We tested a coordinator against designs built on these mechanisms,
-in teams of up to 1,024 language-model agents.
+in three test beds with up to 1,024 language-model agents.
 
 13
-00:01:02,400 --> 00:01:08,530
+00:01:02,867 --> 00:01:08,997
 Here are two recorded episodes
 of a wildfire rescue, each with 128 drones.
 
 14
-00:01:08,880 --> 00:01:11,701
+00:01:09,347 --> 00:01:12,319
 On the left, a coordinator assigns every drone.
 
 15
-00:01:12,051 --> 00:01:16,695
+00:01:12,669 --> 00:01:17,313
 On the right, NatureSwarm: each drone
 decides from what nearby drones relay.
 
 16
-00:01:18,100 --> 00:01:24,776
+00:01:18,733 --> 00:01:25,444
 With 128 drones, coordinators run by smaller
 language models saved 41% of victims.
 
 17
-00:01:25,126 --> 00:01:29,212
-Drones using insect-inspired mechanisms saved 79%.
+00:01:25,794 --> 00:01:30,844
+Drones choosing their own tasks,
+as social insects do, saved 79%.
 
 18
-00:01:30,633 --> 00:01:36,740
+00:01:32,267 --> 00:01:38,815
+A simple law fitted on small teams predicted the coordinator's
+decline in larger teams for six of seven models.
+
+19
+00:01:40,233 --> 00:01:46,410
 Here a frontier model runs the coordinator of 512 drones,
 and a small model runs NatureSwarm.
 
-19
-00:01:38,167 --> 00:01:46,921
+20
+00:01:47,833 --> 00:01:56,309
 With 1,024 drones, NatureSwarm run by a small model came close
 to a frontier model's coordinator at under a third of the price.
 
-20
-00:01:48,333 --> 00:01:52,815
-A simple law fitted on small teams
-predicted the decline in larger ones.
-
 21
-00:01:53,165 --> 00:01:58,145
-Of 17 results in larger teams,
-15 lay inside its predicted range.
+00:01:57,733 --> 00:02:04,978
+When model calls take time, the fire does not wait: drones under
+a frontier model's coordinator hover until their orders arrive.
 
 22
-00:01:59,567 --> 00:02:06,074
-We also made the tasks harder. Here migrating birds meet
-a ridge with two passes, one of them watched by a hawk.
+00:02:05,328 --> 00:02:10,878
+In teams of 32 and 64 drones, NatureSwarm
+then outperformed even that coordinator.
 
 23
-00:02:07,500 --> 00:02:14,187
-And here foragers work a network of paths in which one stretch
-becomes blocked, under a coordinator and under the ant design.
+00:02:12,300 --> 00:02:17,675
+NatureSwarm also kept teams working when
+radio range was cut or the base fell silent.
 
 24
-00:02:15,600 --> 00:02:18,537
-Every animation in this video is a recorded episode.
+00:02:19,100 --> 00:02:25,613
+The third test bed is an epidemic response: county health
+departments place testing teams as a new variant spreads.
 
 25
-00:02:18,887 --> 00:02:22,777
-The episode viewer on the project
-page plays them step by step.
+00:02:25,963 --> 00:02:30,921
+Counties that pooled alerts with their commuting partners
+curbed the variant more than a state coordinator.
 
 26
-00:02:24,200 --> 00:02:28,414
+00:02:32,333 --> 00:02:37,244
+When we let organizations evolve,
+smaller models' populations dropped the coordinator.
+
+27
+00:02:37,594 --> 00:02:41,251
+The frontier model's population, with 16 drones, kept it.
+
+28
+00:02:42,667 --> 00:02:45,534
+Every animation in this video is a recorded episode.
+
+29
+00:02:45,884 --> 00:02:51,910
+The Explorer on the project page plays them
+step by step, across all three test beds.
+
+30
+00:02:53,333 --> 00:02:57,629
 Mechanisms borrowed from nature help
 where central control reaches its limits.
 
-27
-00:02:28,764 --> 00:02:33,954
+31
+00:02:57,979 --> 00:03:03,378
 The test beds, the designs, the experiment scripts
-and the viewer are released with the paper.
+and the Explorer are released with the paper.

@@ -1,7 +1,7 @@
 {
- "source": "Plotted values of Figs 2 to 4 of the manuscript, exported by scripts/viz/export_results.py",
+ "source": "Plotted values of the manuscript's figures and the stored PandemicEnv confirmation, exported by scripts/viz/export_results.py",
  "scaling": {
-  "figure": "Fig. 2d",
+  "figure": "Fig. 3f",
   "models": [
    {
     "model": "gpt-oss 20B",
@@ -352,7 +352,7 @@
   ]
  },
  "adaptive": {
-  "figure": "Fig. 2e",
+  "figure": "Fig. 2d",
   "model": "Gemini 2.5 Flash-Lite",
   "sizes": [
    8,
@@ -399,7 +399,7 @@
   "gap128": 34.4
  },
  "tokens": {
-  "figure": "Fig. 2f",
+  "figure": "Fig. 3d",
   "sizes": [
    8,
    16,
@@ -438,7 +438,7 @@
   ]
  },
  "frontier": {
-  "figure": "Fig. 2g",
+  "figure": "Fig. 2f",
   "sizes": [
    128,
    256,
@@ -489,7 +489,7 @@
   }
  },
  "silent": {
-  "figure": "Fig. 3b",
+  "figure": "Fig. 6e",
   "steps": [
    0,
    1,
@@ -869,7 +869,7 @@
   ]
  },
  "realtime": {
-  "figure": "Fig. 3e",
+  "figure": "Fig. 6d",
   "sizes": [
    16,
    32,
@@ -1057,13 +1057,21 @@
   ]
  },
  "law": {
-  "figure": "Fig. 4a,b",
+  "figure": "Fig. 4e,f",
   "form": "advantage = intercept + slope x log2(team size), in percentage points",
+  "equation": "D(N) = d8 - beta x log2(N/8); n_star = 8 x 2^(d8/beta); d8 and beta in percentage points",
   "models": [
    {
     "model": "Gemini 4 Argon",
     "intercept": 10.5613,
     "slope": -1.8229,
+    "d8": 5.09,
+    "beta": 1.82,
+    "n_star": 55.47,
+    "fitted_on": [
+     8,
+     32
+    ],
     "points": [
      {
       "n": 8,
@@ -1127,6 +1135,14 @@
     "model": "Gemini 3.6 Flash",
     "intercept": 12.7572,
     "slope": -1.6975,
+    "d8": 7.66,
+    "beta": 1.7,
+    "n_star": 182.93,
+    "fitted_on": [
+     8,
+     16,
+     32
+    ],
     "points": [
      {
       "n": 8,
@@ -1168,6 +1184,14 @@
     "model": "Gemini 2.5 Flash",
     "intercept": 15.535,
     "slope": -3.3758,
+    "d8": 5.41,
+    "beta": 3.38,
+    "n_star": 24.28,
+    "fitted_on": [
+     8,
+     16,
+     32
+    ],
     "points": [
      {
       "n": 8,
@@ -1209,6 +1233,14 @@
     "model": "Llama 4 Maverick",
     "intercept": 18.7178,
     "slope": -5.488,
+    "d8": 2.25,
+    "beta": 5.49,
+    "n_star": 10.63,
+    "fitted_on": [
+     8,
+     16,
+     32
+    ],
     "points": [
      {
       "n": 8,
@@ -1250,6 +1282,14 @@
     "model": "Gemini 3.1 Flash-Lite",
     "intercept": 19.0394,
     "slope": -5.8738,
+    "d8": 1.42,
+    "beta": 5.87,
+    "n_star": 9.46,
+    "fitted_on": [
+     8,
+     16,
+     32
+    ],
     "points": [
      {
       "n": 8,
@@ -1291,6 +1331,14 @@
     "model": "Gemini 2.5 Flash-Lite",
     "intercept": 23.1867,
     "slope": -8.6227,
+    "d8": -2.68,
+    "beta": 8.62,
+    "n_star": 6.45,
+    "fitted_on": [
+     8,
+     16,
+     32
+    ],
     "points": [
      {
       "n": 8,
@@ -1332,6 +1380,14 @@
     "model": "gpt-oss 20B",
     "intercept": 8.2369,
     "slope": -6.9734,
+    "d8": -12.68,
+    "beta": 6.97,
+    "n_star": 2.27,
+    "fitted_on": [
+     8,
+     16,
+     32
+    ],
     "points": [
      {
       "n": 8,
@@ -1406,7 +1462,7 @@
   ]
  },
  "padding": {
-  "figure": "Fig. 4d",
+  "figure": "Fig. 4b",
   "of": "mean of the three smaller models",
   "sizes": [
    8,
@@ -1457,6 +1513,299 @@
     82.5,
     79.5,
     77.9
+   ]
+  }
+ },
+ "pandemic": {
+  "figure": "Supplementary Fig. 29 and Supplementary Note 20",
+  "of": "registered confirmation, counties around Dallas, seeds 300 to 302, mean over seeds",
+  "outcome": "infections averted against no action on the same seed (%): the variant's (primary) and all (secondary)",
+  "sizes": [
+   16,
+   32,
+   64,
+   256,
+   1024
+  ],
+  "models": [
+   {
+    "model": "Gemini 2.5 Flash-Lite",
+    "natureswarm": [
+     44.9,
+     65.6,
+     78.9,
+     78.4,
+     75.2
+    ],
+    "coordinator": [
+     38.4,
+     25.2,
+     48.4,
+     66.2,
+     52.2
+    ],
+    "natureswarm_all": [
+     24.7,
+     26.8,
+     28.0,
+     22.4,
+     12.9
+    ],
+    "coordinator_all": [
+     32.8,
+     32.7,
+     38.1,
+     41.5,
+     32.8
+    ]
+   },
+   {
+    "model": "Gemini 3.1 Flash-Lite",
+    "natureswarm": [
+     55.8,
+     68.9,
+     73.6,
+     81.7,
+     81.3
+    ],
+    "coordinator": [
+     3.8,
+     3.8,
+     56.7,
+     48.3,
+     12.3
+    ],
+    "natureswarm_all": [
+     26.7,
+     25.9,
+     25.2,
+     22.3,
+     13.8
+    ],
+    "coordinator_all": [
+     21.1,
+     24.1,
+     40.1,
+     36.9,
+     30.8
+    ]
+   }
+  ],
+  "detection": [
+   31.1,
+   52.0,
+   75.6,
+   79.9,
+   79.8
+  ],
+  "detection_all": [
+   10.6,
+   20.6,
+   25.8,
+   23.1,
+   15.2
+  ],
+  "natureswarm_minus_detection": {
+   "mean": 6.7,
+   "lo": 4.6,
+   "hi": 9.5,
+   "supported": true
+  },
+  "natureswarm_minus_coordinator": {
+   "mean": 34.9,
+   "lo": 22.4,
+   "hi": 50.3,
+   "supported": true
+  },
+  "natureswarm_minus_coordinator_all": {
+   "mean": -10.2,
+   "lo": -13.1,
+   "hi": -7.7,
+   "supported": false
+  },
+  "natureswarm_minus_detection_by_size": [
+   19.3,
+   15.2,
+   0.6,
+   0.1,
+   -1.6
+  ]
+ },
+ "natureenv": {
+  "figure": "Fig. 3a,b",
+  "of": "mean over models and seeds; score from 0 to 100",
+  "names": {
+   "hierarchy": "Coordinator",
+   "bee": "Bee design",
+   "ant": "Ant design",
+   "broadcast": "Broadcast",
+   "solitary": "Solitary agents",
+   "flock": "Flock design",
+   "board": "Shared board",
+   "roost-v3": "NatureSwarm, whole-network relay"
+  },
+  "main": {
+   "figure": "Fig. 3a",
+   "of": "eight models",
+   "designs": [
+    "hierarchy",
+    "bee",
+    "ant",
+    "broadcast",
+    "solitary",
+    "flock"
+   ],
+   "rows": [
+    {
+     "key": "nest",
+     "name": "Nest site",
+     "scores": {
+      "hierarchy": 86.5,
+      "bee": 83.9,
+      "ant": 81.6,
+      "broadcast": 87.6,
+      "solitary": 83.6,
+      "flock": 83.3
+     }
+    },
+    {
+     "key": "forage",
+     "name": "Foraging",
+     "scores": {
+      "hierarchy": 77.2,
+      "bee": 69.2,
+      "ant": 71.5,
+      "broadcast": 70.8,
+      "solitary": 63.8,
+      "flock": 63.5
+     }
+    },
+    {
+     "key": "compete",
+     "name": "Competition",
+     "scores": {
+      "hierarchy": 58.0,
+      "bee": 55.6,
+      "ant": 55.4,
+      "broadcast": 54.6,
+      "solitary": 52.9,
+      "flock": 50.4
+     }
+    },
+    {
+     "key": "migrate",
+     "name": "Migration",
+     "scores": {
+      "hierarchy": 77.7,
+      "bee": 51.7,
+      "ant": 50.3,
+      "broadcast": 44.6,
+      "solitary": 45.5,
+      "flock": 32.8
+     }
+    },
+    {
+     "key": "all",
+     "name": "All 24 missions",
+     "scores": {
+      "hierarchy": 74.9,
+      "bee": 65.1,
+      "ant": 64.7,
+      "broadcast": 64.4,
+      "solitary": 61.4,
+      "flock": 57.5
+     }
+    }
+   ]
+  },
+  "held_out": {
+   "figure": "Fig. 3b",
+   "of": "new seeds, two models not used in development",
+   "designs": [
+    "hierarchy",
+    "roost-v3",
+    "board",
+    "bee",
+    "solitary"
+   ],
+   "rows": [
+    {
+     "key": "nest",
+     "name": "Nest site",
+     "scores": {
+      "hierarchy": 86.7,
+      "roost-v3": 90.3,
+      "board": 92.3,
+      "bee": 87.8,
+      "solitary": 87.1
+     }
+    },
+    {
+     "key": "forage",
+     "name": "Foraging",
+     "scores": {
+      "hierarchy": 79.8,
+      "roost-v3": 87.4,
+      "board": 89.2,
+      "bee": 77.0,
+      "solitary": 71.2
+     }
+    },
+    {
+     "key": "compete",
+     "name": "Competition",
+     "scores": {
+      "hierarchy": 56.2,
+      "roost-v3": 57.3,
+      "board": 57.6,
+      "bee": 56.6,
+      "solitary": 54.0
+     }
+    },
+    {
+     "key": "migrate",
+     "name": "Migration",
+     "scores": {
+      "hierarchy": 95.4,
+      "roost-v3": 99.2,
+      "board": 82.4,
+      "bee": 59.9,
+      "solitary": 51.9
+     }
+    },
+    {
+     "key": "24 standard missions",
+     "name": "All 24 missions",
+     "scores": {
+      "hierarchy": 79.5,
+      "roost-v3": 83.6,
+      "board": 80.4,
+      "bee": 70.3,
+      "solitary": 66.1
+     }
+    },
+    {
+     "key": "nest-k7-liars",
+     "name": "Lying scouts",
+     "scores": {
+      "hierarchy": 52.0,
+      "roost-v3": 78.0,
+      "board": 78.0,
+      "bee": 85.8,
+      "solitary": 88.5
+     }
+    },
+    {
+     "key": "trail-block-early",
+     "name": "Trail blocked early",
+     "scores": {
+      "hierarchy": 75.7,
+      "roost-v3": 87.6,
+      "board": 88.7,
+      "bee": 85.2,
+      "solitary": 81.5
+     }
+    }
    ]
   }
  }
